@@ -15,7 +15,10 @@ import { UpdateProjectSettingsCommand } from "@/commands/project";
 import { DEFAULT_BACKGROUND_COLOR } from "@/background/color";
 import { DEFAULT_CANVAS_SIZE } from "@/canvas/sizes";
 import { DEFAULT_FPS } from "@/fps/defaults";
-import { buildDefaultScene, getProjectDurationFromScenes } from "@/timeline/scenes";
+import {
+	buildDefaultScene,
+	getProjectDurationFromScenes,
+} from "@/timeline/scenes";
 import { buildScene } from "@/services/renderer/scene-builder";
 import { CanvasRenderer } from "@/services/renderer/canvas-renderer";
 import {
@@ -29,6 +32,7 @@ import { DEFAULTS } from "@/timeline/defaults";
 import { getElementFontFamilies } from "@/timeline/element-utils";
 import { getRaisedProjectFpsForImportedMedia } from "@/fps/utils";
 import type { MediaAsset } from "@/media/types";
+import { LocalCoreError, localProjectStore } from "@/services/local-core";
 
 export interface MigrationState {
 	isMigrating: boolean;
@@ -57,8 +61,46 @@ export class ProjectManager {
 		result: null,
 	};
 	private exportCancelRequested = false;
+	private externalRevisionReload = Promise.resolve();
+	private readonly projectLoads = new Map<string, Promise<void>>();
 
-	constructor(private editor: EditorCore) {}
+	constructor(private editor: EditorCore) {
+		localProjectStore.subscribeExternalRevisions(({ projectId, revision }) => {
+			this.queueExternalRevisionReload({ projectId, revision });
+		});
+	}
+
+	private queueExternalRevisionReload({
+		projectId,
+		revision,
+	}: {
+		projectId: string;
+		revision: number;
+	}): void {
+		this.externalRevisionReload = this.externalRevisionReload
+			.catch(() => undefined)
+			.then(async () => {
+				if (this.active?.metadata.id !== projectId || this.isLoading) return;
+				if (this.editor.save.getIsDirty()) {
+					this.editor.save.pause();
+					toast.warning("Project changed outside this editor", {
+						description:
+							"Local unsaved edits were preserved. Reload after reviewing them; autosave is paused to prevent an overwrite.",
+					});
+					return;
+				}
+
+				await this.loadProject({ id: projectId });
+				toast.success(`Project updated to revision ${revision}`);
+			})
+			.catch((error: unknown) => {
+				console.error("Failed to hydrate external project revision", error);
+				toast.error("Project revision could not be reloaded", {
+					description:
+						error instanceof Error ? error.message : "Local daemon unavailable",
+				});
+			});
+	}
 
 	private async ensureStorageMigrations(): Promise<void> {
 		if (this.storageMigrationPromise) {
@@ -126,15 +168,36 @@ export class ProjectManager {
 	}
 
 	async loadProject({ id }: { id: string }): Promise<void> {
+		const inFlight = this.projectLoads.get(id);
+		if (inFlight) {
+			await inFlight;
+			return;
+		}
+
+		const load = this.loadProjectInternal({ id });
+		this.projectLoads.set(id, load);
+		try {
+			await load;
+		} finally {
+			if (this.projectLoads.get(id) === load) this.projectLoads.delete(id);
+		}
+	}
+
+	private async loadProjectInternal({ id }: { id: string }): Promise<void> {
 		if (!this.isInitialized) {
 			this.isLoading = true;
 			this.notify();
 		}
 
+		this.editor.save.discardPending();
 		this.editor.save.pause();
 		await this.ensureStorageMigrations();
 		this.editor.media.clearAllAssets();
-		this.editor.scenes.clearScenes();
+		// Do not clear scenes while the editor shell is mounted. `clearScenes()`
+		// notifies synchronously and renderers call `getActiveScene()` during that
+		// transient state, which turns a harmless external revision hydration into
+		// a client-side "No active scene" crash. `initializeScenes()` replaces the
+		// list and active scene atomically from the point of view of its manager.
 
 		try {
 			const result = await storageService.loadProject({ id });
@@ -145,14 +208,15 @@ export class ProjectManager {
 			const project = result.project;
 
 			this.active = project;
+			// Initialize the scene manager before notifying the project manager. The
+			// editor shell remains mounted during an external revision hydration, so a
+			// notification with a new project and the old/null active scene can make
+			// renderers throw while they read both stores in the same render pass.
+			this.editor.scenes.initializeScenes({
+				scenes: project.scenes ?? [],
+				currentSceneId: project.currentSceneId,
+			});
 			this.notify();
-
-			if (project.scenes && project.scenes.length > 0) {
-				this.editor.scenes.initializeScenes({
-					scenes: project.scenes,
-					currentSceneId: project.currentSceneId,
-				});
-			}
 
 			await this.editor.media.loadProjectMedia({ projectId: id });
 
@@ -168,10 +232,10 @@ export class ProjectManager {
 
 			if (!project.metadata.thumbnail) {
 				try {
-					const didUpdateThumbnail = await this.updateThumbnailFromTimeline();
-					if (didUpdateThumbnail) {
-						await this.saveCurrentProject();
-					}
+					// Thumbnails are browser presentation state and are not part of the
+					// daemon's versioned project document. Generating one while hydrating
+					// must never create a project revision.
+					await this.updateThumbnailFromTimeline();
 				} catch (error) {
 					console.error("Failed to generate project thumbnail:", error);
 				}
@@ -206,6 +270,23 @@ export class ProjectManager {
 			this.updateMetadata(updatedProject);
 		} catch (error) {
 			console.error("Failed to save project:", error);
+			if (
+				error instanceof LocalCoreError &&
+				(error.code === "revisionConflict" ||
+					error.code === "revision_conflict")
+			) {
+				this.editor.save.pause();
+				toast.error("Project changed outside this editor", {
+					description:
+						"Autosave is paused to protect the Codex revision. Reload the project before making more edits.",
+				});
+			} else {
+				toast.error("Project was not saved", {
+					description:
+						error instanceof Error ? error.message : "Local daemon unavailable",
+				});
+			}
+			throw error;
 		}
 	}
 
@@ -278,14 +359,20 @@ export class ProjectManager {
 		if (uniqueIds.length === 0) return;
 
 		try {
-			await Promise.all(
-				uniqueIds.map((id) =>
-					Promise.all([
-						storageService.deleteProjectMedia({ projectId: id }),
-						storageService.deleteProject({ id }),
-					]),
-				),
-			);
+			// Project deletion is authoritative in the daemon. Never remove browser
+			// media first: a CAS conflict or daemon outage must not make a project
+			// irrecoverable. Media is best-effort garbage collection afterwards.
+			for (const id of uniqueIds) {
+				await storageService.deleteProject({ id });
+				try {
+					await storageService.deleteProjectMedia({ projectId: id });
+				} catch (cleanupError) {
+					console.warn("Project deleted but local media cleanup is pending", {
+						id,
+						cleanupError,
+					});
+				}
+			}
 
 			const idSet = new Set(uniqueIds);
 			this.savedProjects = this.savedProjects.filter(
@@ -528,15 +615,14 @@ export class ProjectManager {
 		this.active = updatedProject;
 		this.notify();
 		this.updateMetadata(updatedProject);
-		this.editor.save.markDirty();
 	}
 
 	async prepareExit(): Promise<void> {
 		if (!this.active) return;
 
 		try {
-			const didUpdateThumbnail = await this.updateThumbnailFromTimeline();
-			if (didUpdateThumbnail) {
+			await this.updateThumbnailFromTimeline();
+			if (this.editor.save.getIsDirty()) {
 				await this.editor.save.flush();
 			}
 		} catch (error) {

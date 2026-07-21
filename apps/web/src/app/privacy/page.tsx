@@ -1,226 +1,112 @@
 import type { Metadata } from "next";
 import { BasePage } from "@/app/base-page";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
-import { SOCIAL_LINKS } from "@/site/social";
 
 export const metadata: Metadata = {
-	title: "Privacy Policy - OpenCut",
+	title: "Privacy - OpenChatCut",
 	description:
-		"Learn how OpenCut handles your data and privacy. Our commitment to protecting your information while you edit videos.",
-	openGraph: {
-		title: "Privacy Policy - OpenCut",
-		description:
-			"Learn how OpenCut handles your data and privacy. Our commitment to protecting your information while you edit videos.",
-		type: "website",
-	},
+		"How the local OpenChatCut editor stores projects and uses optional providers.",
 };
 
 export default function PrivacyPage() {
 	return (
 		<BasePage
-			title="Privacy policy"
-			description="Learn how we handle your data and privacy. Contact us if you have any questions."
+			title="Privacy"
+			description="OpenChatCut is local-first. Network access is limited to features you explicitly configure or approve."
 		>
-			<Accordion type="single" collapsible className="w-full">
-				<AccordionItem
-					value="quick-summary"
-					className="rounded-2xl border px-5"
-				>
-					<AccordionTrigger className="no-underline!">
-						Quick summary
-					</AccordionTrigger>
-					<AccordionContent>
-						<h3 className="mb-3 text-lg font-medium">
-							Your content never leaves your device.
-						</h3>
-						<ol className="list-decimal space-y-2 pl-6">
-							<li>
-								Basic editing happens locally in your browser - we never see
-								your files
-							</li>
-							<li>
-								AI features like auto captions run locally in your browser
-								too - nothing is uploaded
-							</li>
-							<li>
-								OpenCut does not currently require an account or login
-							</li>
-							<li>Project data stays on your device, not our servers</li>
-							<li>
-								We use anonymized analytics to improve the app, but no personal video
-								content is tracked
-							</li>
-							<li>You can clear local data from your browser at any time</li>
-							<li>
-								We don&apos;t sell or share your data with anyone (we don&apos;t
-								even have it)
-							</li>
-						</ol>
-						<p className="mt-4">
-							Questions? Email us at{" "}
-							<a
-								href="mailto:oss@opencut.app"
-								className="text-primary hover:underline"
-							>
-								oss@opencut.app
-							</a>
-						</p>
-					</AccordionContent>
-				</AccordionItem>
-			</Accordion>
-
 			<section className="flex flex-col gap-3">
-				<h2 className="text-2xl font-semibold">How We Handle Your Content</h2>
+				<h2 className="text-2xl font-semibold">Local project authority</h2>
 				<p>
-					<strong>
-						All editing and processing happens locally on your device.
-					</strong>{" "}
-					We never upload, store, or have access to your video or audio files.
-					Your content remains completely private and under your control.
-					AI-powered features like auto captions also run in your browser using
-					on-device models - no content ever leaves your device.
+					The loopback-only <code>openchatcutd</code> daemon stores project
+					revisions, jobs, transcripts and metadata in local SQLite. Imported
+					media is copied into a local SHA-256 content store by default. Browser
+					storage is only a UI cache and Classic migration source, not the
+					authoritative project database.
+				</p>
+				<p>
+					Linked-file mode is optional, requires an explicit portability
+					warning, and keeps the selected host path outside the managed media
+					store.
 				</p>
 			</section>
 
 			<section className="flex flex-col gap-3">
-				<h2 className="text-2xl font-semibold">Accounts & Authentication</h2>
+				<h2 className="text-2xl font-semibold">
+					When data can leave the device
+				</h2>
 				<p>
-					OpenCut does not currently offer user accounts, login, or Google
-					sign-in.
+					The editor contacts an external service only for an approved workflow:
 				</p>
-				<p>
-					Because there is no account system today, we do not collect account
-					emails, profile information, or OAuth identity data.
-				</p>
-				<p>
-					Your projects are never stored on our servers. All project data,
-					including names, thumbnails, and creation dates, is stored locally
-					in your browser using IndexedDB.
-				</p>
-			</section>
-
-			<section className="flex flex-col gap-3">
-				<h2 className="text-2xl font-semibold">Analytics</h2>
-				<p>
-					We use{" "}
-					<a
-						href="https://www.databuddy.cc"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-primary hover:underline"
-					>
-						Databuddy
-					</a>{" "}
-					for basic, anonymized visitor counts. We do not track clicks,
-					interactions, or how you use the editor.
-				</p>
-				<p>
-					No personal information is collected, no individual users are tracked,
-					and no data that could identify you is stored.
-				</p>
-			</section>
-
-			<section className="flex flex-col gap-3">
-				<h2 className="text-2xl font-semibold">Local Storage & Cookies</h2>
-				<p>We use browser local storage and IndexedDB to:</p>
-				<ul className="list-disc space-y-2 pl-6">
-					<li>Save your projects locally on your device</li>
-					<li>Remember your editor preferences and settings</li>
-					<li>Store app state needed for the editor to work between sessions</li>
-				</ul>
-				<p>
-					All data stays on your device and can be cleared at any time through
-					your browser settings.
-				</p>
-			</section>
-
-			<section className="flex flex-col gap-3">
-				<h2 className="text-2xl font-semibold">Third-Party Services</h2>
-				<p>OpenCut integrates with these services:</p>
 				<ul className="list-disc space-y-2 pl-6">
 					<li>
-						<strong>Vercel:</strong> For hosting and content delivery
+						Codex Agent and image generation delegate authentication to your
+						installed Codex login. Planning may include the pinned project
+						document and up to eight managed thumbnails or contact sheets;
+						source video is not attached.
 					</li>
 					<li>
-						<strong>Databuddy:</strong> For anonymized analytics
+						A configured OpenAI-compatible or Ollama Agent receives the
+						disclosed pinned project, transcript, caption and asset metadata
+						only after you confirm the external context transfer. It does not
+						receive visual frames.
+					</li>
+					<li>
+						Seedance-compatible, fal.ai, Suno and other configured generation
+						providers receive the reviewed prompt and parameters only after
+						confirmation. Their terms, retention and charges are controlled by
+						that provider and your key.
+					</li>
+					<li>
+						Remote media import and URL capture contact the approved public URL
+						through SSRF, redirect and size checks. Downloaded results
+						immediately become local managed assets.
 					</li>
 				</ul>
 			</section>
 
 			<section className="flex flex-col gap-3">
-				<h2 className="text-2xl font-semibold">Your Rights</h2>
-				<p>You have complete control over your data:</p>
-				<ul className="list-disc space-y-2 pl-6">
-					<li>No account is required to use OpenCut today</li>
-					<li>Clear local storage to remove all saved projects</li>
-					<li>Contact us with any privacy concerns</li>
-				</ul>
-			</section>
-
-			<section className="flex flex-col gap-3">
-				<h2 className="text-2xl font-semibold">Open Source Transparency</h2>
+				<h2 className="text-2xl font-semibold">
+					Credentials and browser sessions
+				</h2>
 				<p>
-					OpenCut is completely open source. You can review our code, see
-					exactly how we handle data, and even self-host the application if you
-					prefer.
+					OpenChatCut has no cloud account system. It never reads or copies
+					Codex credential files. Provider keys remain in the private daemon
+					configuration and are not returned to the Web editor or MCP bridge.
 				</p>
 				<p>
-					View our source code on{" "}
-					<a
-						href={SOCIAL_LINKS.github}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-primary hover:underline"
-					>
-						GitHub
-					</a>
-					.
+					The daemon issues a short-lived HttpOnly loopback cookie and CSRF
+					token to the local editor. The daemon bearer token and runtime
+					descriptor are stored in permission-restricted local files.
 				</p>
 			</section>
 
 			<section className="flex flex-col gap-3">
-				<h2 className="text-2xl font-semibold">Contact Us</h2>
-				<p>Questions about this privacy policy or how we handle your data?</p>
+				<h2 className="text-2xl font-semibold">Telemetry</h2>
 				<p>
-					Open an issue on our{" "}
-					<a
-						href={`${SOCIAL_LINKS.github}/issues`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-primary hover:underline"
-					>
-						GitHub repository
-					</a>
-					, email us at{" "}
-					<a
-						href="mailto:oss@opencut.app"
-						className="text-primary hover:underline"
-					>
-						oss@opencut.app
-					</a>
-					, or reach out on{" "}
-					<a
-						href={SOCIAL_LINKS.x}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-primary hover:underline"
-					>
-						X (Twitter)
-					</a>
-					.
+					Telemetry and product analytics are disabled by default. The local
+					daemon does not send usage, project, crash or media data to an
+					OpenChatCut service.
+				</p>
+			</section>
+
+			<section className="flex flex-col gap-3">
+				<h2 className="text-2xl font-semibold">Retention and control</h2>
+				<p>
+					Projects, named versions, job records and managed assets remain on the
+					local machine until you delete them. Safe media garbage collection
+					preserves bytes that are still referenced by history, versions or
+					active jobs. Portable project packages contain the pinned project and
+					managed media you choose to export.
+				</p>
+				<p>
+					You can inspect this behavior in the repository source and remove the
+					local OpenChatCut data directory when you no longer need it.
 				</p>
 			</section>
 
 			<Separator />
-
 			<p className="text-muted-foreground text-sm">
-				Last updated: March 15, 2026
+				Last updated: July 16, 2026
 			</p>
 		</BasePage>
 	);

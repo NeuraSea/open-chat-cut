@@ -1,28 +1,14 @@
 # Security Policy
 
-## Supported Versions
+Please report suspected vulnerabilities privately through the repository
+owner's security-reporting channel. Do not include daemon tokens, provider
+credentials, private media, transcripts, or reproduction projects in a public
+issue.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
+Security-sensitive areas include loopback authentication, CSRF and Origin
+checks, authorized import/export roots, symlink traversal, remote-download
+SSRF, provider redirects, subtitle parsing, prompt injection, MG/JSX sandboxing,
+and secret redaction. Include the affected commit, platform, minimal steps, and
+impact when reporting.
 
-## Reporting a Vulnerability
-
-We take security vulnerabilities seriously. If you discover a security vulnerability within OpenCut, please send an email to security@opencut.app. All security vulnerabilities will be promptly addressed.
-
-Please do not report security vulnerabilities through public GitHub issues.
-
-### What to include in your report
-
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Any suggested fixes
-
-### Response timeline
-
-- We will acknowledge receipt within 48 hours
-- We will provide a detailed response within 5 business days
-- We will keep you updated on our progress
-
-Thank you for helping keep OpenCut secure!
+Only the current `main` branch is supported before the first stable release.

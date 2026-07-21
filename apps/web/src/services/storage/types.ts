@@ -25,8 +25,10 @@ export interface MediaAssetData {
 	duration?: number;
 	fps?: number;
 	hasAudio?: boolean;
+	contentHash?: string;
 	ephemeral?: boolean;
 	thumbnailUrl?: string;
+	thumbnailContentHash?: string;
 }
 
 export type SerializedScene = Omit<TScene, "createdAt" | "updatedAt"> & {

@@ -1,12 +1,40 @@
 "use client";
 
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import { SOCIAL_LINKS } from "@/site/social";
 import { useLocalStorage } from "@/services/storage/use-local-storage";
 import { Button } from "../ui/button";
 import { Dialog, DialogBody, DialogContent, DialogTitle } from "../ui/dialog";
+
+const STEPS = [
+	{
+		title: "Welcome to OpenChatCut",
+		description:
+			"A local-first video editor where manual edits, Agent plans, generated assets, and exports share one revisioned project.",
+		points: [
+			"Edit with the Classic timeline, Script workspace, or Codex Agent",
+			"Undo Agent changes as a single project revision",
+		],
+	},
+	{
+		title: "Your local core owns the project",
+		description:
+			"The loopback daemon stores projects in SQLite and managed media in a content-addressed library. Browser storage is only a cache and migration source.",
+		points: [
+			"Closing the browser does not stop Codex jobs or exports",
+			"Linked files are optional and explicitly marked non-portable",
+		],
+	},
+	{
+		title: "You control external services",
+		description:
+			"Telemetry is off. Codex uses its own signed-in session, while paid or third-party providers require explicit configuration and approval before project context leaves this machine.",
+		points: [
+			"Review the normalized diff, cost, dependencies, and warnings first",
+			"Start with the Agent or Script tabs, or keep editing manually",
+		],
+	},
+] as const;
 
 export function Onboarding() {
 	const [step, setStep] = useState(0);
@@ -17,105 +45,49 @@ export function Onboarding() {
 
 	const isOpen = !hasSeenOnboarding;
 
-	const handleNext = () => {
-		setStep(step + 1);
-	};
+	const current = STEPS[Math.min(step, STEPS.length - 1)];
+	const isLastStep = step === STEPS.length - 1;
+
+	const handleNext = () => setStep((currentStep) => currentStep + 1);
 
 	const handleClose = () => {
 		setHasSeenOnboarding({ value: true });
 	};
 
-	const getStepTitle = () => {
-		switch (step) {
-			case 0:
-				return "Welcome to OpenCut Beta! 🎉";
-			case 1:
-				return "⚠️ This is a super early beta!";
-			case 2:
-				return "🦋 Have fun testing!";
-			default:
-				return "OpenCut Onboarding";
-		}
-	};
-
-	const renderStepContent = () => {
-		switch (step) {
-			case 0:
-				return (
-					<div className="space-y-5">
-						<div className="space-y-3">
-							<Title title="Welcome to OpenCut Beta! 🎉" />
-							<Description description="You're among the first to try OpenCut - the fully open source CapCut alternative." />
-						</div>
-						<NextButton onClick={handleNext}>Next</NextButton>
-					</div>
-				);
-			case 1:
-				return (
-					<div className="space-y-5">
-						<div className="space-y-3">
-							<Title title={getStepTitle()} />
-							<Description description="There's still a ton of things to do to make this editor amazing." />
-							<Description description="A lot of features are still missing. We're working hard to build them out!" />
-							<Description description="If you're curious, check out our roadmap [here](https://opencut.app/roadmap)" />
-						</div>
-						<NextButton onClick={handleNext}>Next</NextButton>
-					</div>
-				);
-			case 2:
-				return (
-					<div className="space-y-5">
-						<div className="space-y-3">
-							<Title title={getStepTitle()} />
-							<Description
-								description={`Join our [Discord](${SOCIAL_LINKS.discord}), chat with cool people and share feedback to help make OpenCut the best editor ever.`}
-							/>
-						</div>
-						<NextButton onClick={handleClose}>Finish</NextButton>
-					</div>
-				);
-			default:
-				return null;
-		}
-	};
-
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[480px]">
 				<DialogTitle>
-					<span className="sr-only">{getStepTitle()}</span>
+					<span className="sr-only">{current.title}</span>
 				</DialogTitle>
-				<DialogBody>{renderStepContent()}</DialogBody>
+				<DialogBody>
+					<div className="space-y-6">
+						<div className="space-y-3">
+							<div className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+								Step {step + 1} of {STEPS.length}
+							</div>
+							<h2 className="text-xl font-semibold tracking-tight">
+								{current.title}
+							</h2>
+							<p className="text-muted-foreground text-sm leading-6">
+								{current.description}
+							</p>
+							<ul className="space-y-2 pt-1">
+								{current.points.map((point) => (
+									<li key={point} className="flex gap-2 text-sm leading-5">
+										<CheckIcon className="text-primary mt-0.5 size-4 shrink-0" />
+										<span>{point}</span>
+									</li>
+								))}
+							</ul>
+						</div>
+						<NextButton onClick={isLastStep ? handleClose : handleNext}>
+							{isLastStep ? "Start editing" : "Next"}
+						</NextButton>
+					</div>
+				</DialogBody>
 			</DialogContent>
 		</Dialog>
-	);
-}
-
-function Title({ title }: { title: string }) {
-	return <h2 className="text-lg font-bold md:text-xl">{title}</h2>;
-}
-
-function Description({ description }: { description: string }) {
-	return (
-		<div className="text-muted-foreground">
-			<ReactMarkdown
-				components={{
-					p: ({ children }) => <p className="mb-0">{children}</p>,
-					a: ({ href, children }) => (
-						<a
-							href={href}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-foreground hover:text-foreground/80 underline"
-						>
-							{children}
-						</a>
-					),
-				}}
-			>
-				{description}
-			</ReactMarkdown>
-		</div>
 	);
 }
 

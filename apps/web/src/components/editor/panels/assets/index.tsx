@@ -10,11 +10,15 @@ import { SoundsView } from "@/sounds/components/assets-view";
 import { StickersView } from "@/stickers/components/assets-view";
 import { TextView } from "@/text/components/assets-view";
 import { EffectsView } from "@/effects/components/assets-view";
+import { AgentView } from "@/agent/components/agent-view";
+import { TranscriptView } from "@/transcript/components/transcript-view";
 
 export function AssetsPanel() {
 	const { activeTab } = useAssetsPanelStore();
 
 	const viewMap: Record<Tab, React.ReactNode> = {
+		agent: <AgentView />,
+		script: <TranscriptView />,
 		media: <MediaView />,
 		sounds: <SoundsView />,
 		text: <TextView />,

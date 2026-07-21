@@ -1,0 +1,72 @@
+services:
+  web:
+    image: ghcr.io/${OPENCHATCUT_IMAGE_REPOSITORY:-openchatcut/openchatcut}/web-hosted:${OPENCHATCUT_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_OPENCHATCUT_API_URL: same-origin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_SITE_URL: https://${OPENCHATCUT_DOMAIN:?set OPENCHATCUT_DOMAIN}
+      NEXT_PUBLIC_OPENCHATCUT_API_URL: same-origin
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  daemon:
+    image: ghcr.io/${OPENCHATCUT_IMAGE_REPOSITORY:-openchatcut/openchatcut}/daemon-full:${OPENCHATCUT_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: ./apps/daemon/Dockerfile.full
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      OPENCHATCUT_CONTAINERIZED: "true"
+      OPENCHATCUT_BIND: 0.0.0.0:3210
+      OPENCHATCUT_HOME: /runtime
+      OPENCHATCUT_DATA_DIR: /data
+      OPENCHATCUT_HOSTED_ORIGIN: https://${OPENCHATCUT_DOMAIN:?set OPENCHATCUT_DOMAIN}
+      OPENCHATCUT_WORKER_EDITOR_URL: http://web:3000
+      OPENCHATCUT_ALLOWED_ORIGINS: http://web:3000
+      OPENCHATCUT_IMPORT_ROOTS: /imports
+      OPENCHATCUT_MEDIA_WORKER: /opt/openchatcut/venv/bin/openchatcut-media-worker
+      OPENCHATCUT_MG_RUNTIME_CLI: /opt/openchatcut/mg-runtime/src/cli.mjs
+      OPENCHATCUT_NODE_COMMAND: /usr/local/bin/node
+      OPENCHATCUT_VIDEO_ACCELERATION: cpu
+    volumes:
+      - openchatcut-hosted-data:/data
+      - openchatcut-hosted-runtime:/runtime
+      - openchatcut-hosted-imports:/imports
+
+  gateway:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      daemon:
+        condition: service_started
+    environment:
+      OPENCHATCUT_DOMAIN: ${OPENCHATCUT_DOMAIN:?set OPENCHATCUT_DOMAIN}
+      OPENCHATCUT_ADMIN_USER: ${OPENCHATCUT_ADMIN_USER:?set OPENCHATCUT_ADMIN_USER}
+      OPENCHATCUT_ADMIN_PASSWORD_HASH: ${OPENCHATCUT_ADMIN_PASSWORD_HASH:?set OPENCHATCUT_ADMIN_PASSWORD_HASH}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/hosted/Caddyfile:/etc/caddy/Caddyfile:ro
+      - openchatcut-hosted-caddy-data:/data
+      - openchatcut-hosted-caddy-config:/config
+
+volumes:
+  openchatcut-hosted-data:
+  openchatcut-hosted-runtime:
+  openchatcut-hosted-imports:
+  openchatcut-hosted-caddy-data:
+  openchatcut-hosted-caddy-config:

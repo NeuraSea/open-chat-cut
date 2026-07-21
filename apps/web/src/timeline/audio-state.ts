@@ -71,7 +71,45 @@ export function resolveEffectiveAudioGain({
 		localTime: Math.round(localTime * TICKS_PER_SECOND),
 	});
 
-	return dBToLinear(resolvedDb);
+	return dBToLinear(resolvedDb) * resolveStoryCrossfadeGain({ element, localTime });
+}
+
+function resolveStoryCrossfadeGain({
+	element,
+	localTime,
+}: {
+	element: AudioCapableElement;
+	localTime: number;
+}): number {
+	const crossfade = element.storyCrossfade;
+	if (
+		!crossfade ||
+		crossfade.version !== 1 ||
+		crossfade.curve !== "equalPower" ||
+		crossfade.preservesLinkedAvTiming !== true
+	) {
+		return 1;
+	}
+	const localTicks = Math.max(0, Math.round(localTime * TICKS_PER_SECOND));
+	const durationTicks = Math.max(1, element.duration);
+	const fadeIn = Math.max(
+		0,
+		Math.min(durationTicks / 2, Number(crossfade.fadeInTicks)),
+	);
+	const fadeOut = Math.max(
+		0,
+		Math.min(durationTicks / 2, Number(crossfade.fadeOutTicks)),
+	);
+	let gain = 1;
+	if (fadeIn > 0 && localTicks < fadeIn) {
+		gain *= Math.sin((Math.max(0, localTicks) / fadeIn) * (Math.PI / 2));
+	}
+	if (fadeOut > 0 && localTicks > durationTicks - fadeOut) {
+		gain *= Math.sin(
+			(Math.max(0, durationTicks - localTicks) / fadeOut) * (Math.PI / 2),
+		);
+	}
+	return Math.max(0, Math.min(1, gain));
 }
 
 export function buildWaveformGainSamples({

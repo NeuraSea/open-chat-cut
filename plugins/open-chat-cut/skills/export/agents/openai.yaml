@@ -1,0 +1,4 @@
+interface:
+  display_name: "Export Video"
+  short_description: "Validate and export pinned project revisions"
+  default_prompt: "Validate this project and export an MP4 without overwriting files."

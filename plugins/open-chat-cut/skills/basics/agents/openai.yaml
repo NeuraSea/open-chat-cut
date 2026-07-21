@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenChatCut Basics"
+  short_description: "Connect to the local editor and manage projects"
+  default_prompt: "Check OpenChatCut status and help me open or create a project."

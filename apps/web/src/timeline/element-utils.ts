@@ -11,7 +11,7 @@ import {
 	type CreateStickerElement,
 	type CreateUploadAudioElement,
 	type CreateLibraryAudioElement,
-	type TextElement,
+	type PlainTextElement,
 	type SceneTracks,
 	type TimelineElement,
 	type AudioElement,
@@ -102,10 +102,10 @@ export function buildTextElement({
 	raw,
 	startTime,
 }: {
-	raw: Partial<Omit<TextElement, "type" | "id">>;
+	raw: Partial<Omit<PlainTextElement, "type" | "id">>;
 	startTime: MediaTime;
 }): CreateTimelineElement {
-	const t = raw as Partial<TextElement>;
+	const t = raw as Partial<PlainTextElement>;
 
 	return {
 		type: "text",

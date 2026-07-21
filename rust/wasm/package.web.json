@@ -1,0 +1,21 @@
+{
+  "name": "opencut-wasm",
+  "version": "0.2.10",
+  "description": "OpenChatCut shared video editor renderer compiled from the repository Rust source",
+  "type": "module",
+  "main": "opencut_wasm.js",
+  "module": "opencut_wasm.js",
+  "types": "opencut_wasm.d.ts",
+  "files": [
+    "opencut_wasm.js",
+    "opencut_wasm.d.ts",
+    "opencut_wasm_bg.js",
+    "opencut_wasm_bg.wasm",
+    "opencut_wasm_bg.wasm.d.ts"
+  ],
+  "sideEffects": [
+    "./opencut_wasm.js",
+    "./opencut_wasm_bg.js"
+  ],
+  "license": "MIT"
+}

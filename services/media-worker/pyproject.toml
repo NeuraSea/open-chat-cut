@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openchatcut-media-worker"
+version = "0.1.0"
+description = "Optional native media and ML worker for OpenChatCut"
+requires-python = ">=3.11"
+license = { text = "AGPL-3.0-only" }
+dependencies = []
+
+[project.optional-dependencies]
+transcription = [
+  "faster-whisper>=1.1.1",
+]
+diarization = [
+  "pyannote.audio>=3.3.2",
+]
+denoise = [
+  "deepfilternet>=0.5.6",
+]
+render = [
+  "playwright>=1.52.0",
+]
+kokoro = [
+  "kokoro>=0.9.4",
+  "soundfile>=0.13.1",
+]
+audiogen = [
+  "audiocraft>=1.3.0",
+  "soundfile>=0.13.1",
+]
+dev = [
+  "pytest>=8.3",
+]
+
+[project.scripts]
+openchatcut-media-worker = "openchatcut_worker.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openchatcut_worker"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

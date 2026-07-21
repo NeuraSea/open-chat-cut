@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
+import { isMobileDevice } from "./mobile-device";
 
 const STORAGE_KEY = "mobile-acknowledged";
 
@@ -18,7 +19,15 @@ export function MobileGate({ children }: MobileGateProps) {
 	const [show, setShow] = useState<boolean | null>(null);
 
 	useEffect(() => {
-		const isMobile = window.innerWidth < 1024;
+		const userAgentData = (
+			navigator as Navigator & { userAgentData?: { mobile?: boolean } }
+		).userAgentData;
+		const isMobile = isMobileDevice({
+			userAgent: navigator.userAgent,
+			platform: navigator.platform,
+			maxTouchPoints: navigator.maxTouchPoints,
+			userAgentDataMobile: userAgentData?.mobile,
+		});
 		const acknowledged = localStorage.getItem(STORAGE_KEY) === "true";
 		setShow(isMobile && !acknowledged);
 	}, []);
@@ -52,9 +61,9 @@ export function MobileGate({ children }: MobileGateProps) {
 						Desktop only (for now)
 					</h1>
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						OpenCut isn't optimized for mobile or iPad yet. Things will break
-						and the layout will be a mess. Come back on a desktop for the real
-						experience.
+						OpenChatCut is not optimized for mobile or iPad. The local daemon,
+						timeline, and professional export workflow currently require a
+						desktop browser.
 					</p>
 				</div>
 				<div className="flex items-center gap-3">

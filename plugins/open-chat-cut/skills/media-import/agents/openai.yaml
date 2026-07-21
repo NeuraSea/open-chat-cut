@@ -1,0 +1,4 @@
+interface:
+  display_name: "Import Media"
+  short_description: "Import and inspect local or remote media"
+  default_prompt: "Import this media into my OpenChatCut project and inspect it."

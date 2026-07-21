@@ -84,21 +84,25 @@ export class CanvasRenderer {
 	}) {
 		await this.render({ node, time });
 
-		const ctx = targetCanvas.getContext("2d");
+		const ctx = targetCanvas.getContext("2d", { alpha: true });
 		if (!ctx) {
 			throw new Error("Failed to get target canvas context");
 		}
 
 		measureSpanSync({
 			name: "drawImage",
-			fn: () =>
+			fn: () => {
+				// drawImage uses source-over compositing. Clear first so transparent
+				// regions in the next frame cannot retain pixels from the prior one.
+				ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
 				ctx.drawImage(
 					wasmCompositor.getCanvas(),
 					0,
 					0,
 					targetCanvas.width,
 					targetCanvas.height,
-				),
+				);
+			},
 		});
 		onRenderPerfFrameComplete();
 	}

@@ -18,10 +18,23 @@ export interface MigrationProgress {
 }
 
 let hasCleanedUpMetaDb = false;
+let activeMigration: Promise<StorageMigrationResult> | null = null;
 
 const MIN_MIGRATION_DISPLAY_MS = 1000;
 
-export async function runStorageMigrations({
+export function runStorageMigrations(args: {
+	migrations: StorageMigration[];
+	onProgress?: (progress: MigrationProgress) => void;
+}): Promise<StorageMigrationResult> {
+	if (!activeMigration) {
+		activeMigration = runStorageMigrationsInternal(args).finally(() => {
+			activeMigration = null;
+		});
+	}
+	return activeMigration;
+}
+
+async function runStorageMigrationsInternal({
 	migrations,
 	onProgress,
 }: {
@@ -38,11 +51,11 @@ export async function runStorageMigrations({
 		hasCleanedUpMetaDb = true;
 	}
 
-	const projectsAdapter = new IndexedDBAdapter<ProjectRecord>(
-		"video-editor-projects",
-		"projects",
-		1,
-	);
+	const projectsAdapter = new IndexedDBAdapter<ProjectRecord>({
+		dbName: "video-editor-projects",
+		storeName: "projects",
+		version: 1,
+	});
 
 	const projects = await projectsAdapter.getAll();
 
@@ -95,7 +108,15 @@ export async function runStorageMigrations({
 				break;
 			}
 
-			await projectsAdapter.set(projectId, result.project);
+			await projectsAdapter.set({ key: projectId, value: result.project });
+			try {
+				await migration.cleanup?.({ projectId, project: result.project });
+			} catch (error) {
+				console.warn(
+					`Migration cleanup deferred for project ${projectId}:`,
+					error,
+				);
+			}
 			migratedCount++;
 			currentVersion = migration.to;
 			projectRecord = result.project;

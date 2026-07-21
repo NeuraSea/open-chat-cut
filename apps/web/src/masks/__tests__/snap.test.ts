@@ -499,9 +499,11 @@ describe("custom mask point insertion", () => {
 			id: "new",
 			x: 0,
 			y: -0.1,
-			inX: 0,
+			// De Casteljau subdivision preserves the original cubic exactly;
+			// the inserted point therefore owns the two half-length handles.
+			inX: -0.1,
 			inY: 0,
-			outX: 0,
+			outX: 0.1,
 			outY: 0,
 		});
 	});

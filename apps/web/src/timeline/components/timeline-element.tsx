@@ -47,7 +47,10 @@ import {
 	getSourceAudioActionLabel,
 	isSourceAudioSeparated,
 } from "@/timeline/audio-separation";
-import { buildWaveformGainSamples, isElementMuted } from "@/timeline/audio-state";
+import {
+	buildWaveformGainSamples,
+	isElementMuted,
+} from "@/timeline/audio-state";
 import { getTimelinePixelsPerSecond } from "@/timeline";
 import { buildWaveformSourceKey } from "@/media/waveform-summary";
 import { addMediaTime, type MediaTime, TICKS_PER_SECOND } from "@/wasm";
@@ -906,11 +909,15 @@ function TextElementContent({
 }: {
 	element: Extract<TimelineElementType, { type: "text" }>;
 }) {
+	const content =
+		element.semanticType === "caption"
+			? `${element.cues.length} cues · ${element.stylePresetId}`
+			: typeof element.params.content === "string"
+				? element.params.content
+				: "";
 	return (
 		<div className="flex size-full items-center justify-start pl-2">
-			<span className="truncate text-xs text-white">
-				{typeof element.params.content === "string" ? element.params.content : ""}
-			</span>
+			<span className="truncate text-xs text-white">{content}</span>
 		</div>
 	);
 }
@@ -959,6 +966,17 @@ function GraphicElementContent({
 }: {
 	element: Extract<TimelineElementType, { type: "graphic" }>;
 }) {
+	if (element.motionGraphic) {
+		return (
+			<div className="flex size-full items-center gap-2 pl-2">
+				<HugeiconsIcon
+					icon={MagicWand05Icon}
+					className="size-4 shrink-0 text-white"
+				/>
+				<span className="truncate text-xs text-white">{element.name}</span>
+			</div>
+		);
+	}
 	return (
 		<div className="flex size-full items-center gap-2 pl-2">
 			<Image

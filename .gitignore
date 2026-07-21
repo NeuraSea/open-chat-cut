@@ -4,6 +4,12 @@
 .tool-versions
 
 node_modules
+.venv/
+.openchatcut/
+.DS_Store
+dist/
+.pytest_cache/
+__pycache__/
 .cursorignore
 .turbo
 
@@ -22,6 +28,7 @@ bun.lockb
 .open-next
 
 target/
+rust/wasm/pkg/
 
 .cargo-tools/
 

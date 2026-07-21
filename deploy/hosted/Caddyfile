@@ -1,0 +1,29 @@
+{$OPENCHATCUT_DOMAIN} {
+	encode zstd gzip
+
+	# The hosted profile is single-user only. Caddy authentication is the
+	# mandatory outer gate before the daemon can issue its short-lived browser
+	# session and CSRF token.
+	basic_auth {
+		{$OPENCHATCUT_ADMIN_USER} {$OPENCHATCUT_ADMIN_PASSWORD_HASH}
+	}
+
+	handle /api/v1/* {
+		reverse_proxy daemon:3210 {
+			# openchatcutd deliberately accepts loopback Host values only. The
+			# original HTTPS Origin remains intact and is checked separately.
+			header_up Host 127.0.0.1:3210
+		}
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+}

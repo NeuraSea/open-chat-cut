@@ -8,10 +8,7 @@ import {
 import { effectsRegistry, resolveEffectPasses } from "@/effects";
 import type { Effect, EffectPass } from "@/effects/types";
 import { getSourceTimeAtClipTime } from "@/retime";
-import {
-	DEFAULT_GRAPHIC_SOURCE_SIZE,
-	resolveGraphicElementParamsAtTime,
-} from "@/graphics";
+import { resolveGraphicElementParamsAtTime } from "@/graphics";
 import {
 	buildTextBackgroundFromElement,
 	getTextMeasurementContext,
@@ -44,6 +41,12 @@ import type {
 	ResolvedVisualSourceNodeState,
 	VisualNodeParams,
 } from "./nodes/visual-node";
+import {
+	buildCaptionRenderState,
+	findActiveCaptionCue,
+	isCaptionElement,
+} from "@/subtitles/caption-element";
+import type { TextElement } from "@/timeline";
 
 type ResolveContext = {
 	renderer: CanvasRenderer;
@@ -293,11 +296,12 @@ function resolveGraphicNode({
 	node: GraphicNode;
 	context: ResolveContext;
 }): ResolvedGraphicNodeState | null {
+	const sourceSize = node.sourceSize;
 	const visualState = resolveVisualState({
 		params: node.params,
 		context,
-		sourceWidth: DEFAULT_GRAPHIC_SOURCE_SIZE,
-		sourceHeight: DEFAULT_GRAPHIC_SOURCE_SIZE,
+		sourceWidth: sourceSize.width,
+		sourceHeight: sourceSize.height,
 	});
 	if (!visualState) {
 		return null;
@@ -305,10 +309,12 @@ function resolveGraphicNode({
 
 	return {
 		...visualState,
-		resolvedParams: resolveGraphicElementParamsAtTime({
-			element: node.params,
-			localTime: visualState.localTime,
-		}),
+		resolvedParams: node.hasMotionGraphicDefinition
+			? node.params.params
+			: resolveGraphicElementParamsAtTime({
+					element: node.params,
+					localTime: visualState.localTime,
+				}),
 	};
 }
 
@@ -331,7 +337,39 @@ function resolveTextNode({
 		elementStartTime: node.params.startTime,
 		elementDuration: node.params.duration,
 	});
-	const background = buildTextBackgroundFromElement({ element: node.params });
+	let resolvedElement: TextElement = node.params;
+	let captionHighlight: ResolvedTextNodeState["captionHighlight"];
+	if (isCaptionElement(node.params)) {
+		const captionTime = roundMediaTime({ time: localTime });
+		const cue = findActiveCaptionCue({
+			element: node.params,
+			localTime: captionTime,
+		});
+		if (!cue) return null;
+		const caption = buildCaptionRenderState({
+			cue,
+			localTime: captionTime,
+			maxCharactersPerLine: node.params.maxCharactersPerLine,
+			maxLines: node.params.maxLines,
+		});
+		resolvedElement = {
+			...node.params,
+			params: { ...node.params.params, content: caption.content },
+		};
+		if (
+			node.params.wordHighlight &&
+			caption.activeWordText &&
+			caption.activeLineIndex >= 0
+		) {
+			captionHighlight = {
+				lineIndex: caption.activeLineIndex,
+				prefix: caption.activePrefix,
+				text: caption.activeWordText,
+				color: node.params.highlightColor,
+			};
+		}
+	}
+	const background = buildTextBackgroundFromElement({ element: resolvedElement });
 
 	return {
 		transform: resolveTransformAtTime({
@@ -346,8 +384,8 @@ function resolveTextNode({
 		}),
 		textColor: resolveColorAtTime({
 			baseColor:
-				typeof node.params.params.color === "string"
-					? node.params.params.color
+				typeof resolvedElement.params.color === "string"
+					? resolvedElement.params.color
 					: "#ffffff",
 			animations: node.params.animations,
 			propertyPath: "color",
@@ -367,11 +405,12 @@ function resolveTextNode({
 			height: context.renderer.height,
 		}),
 		measuredText: measureTextElement({
-			element: node.params,
+			element: resolvedElement,
 			canvasHeight: node.params.canvasHeight,
 			localTime,
 			ctx: getTextMeasurementContext(),
 		}),
+		captionHighlight,
 	};
 }
 

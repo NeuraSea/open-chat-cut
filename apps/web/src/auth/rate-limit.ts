@@ -10,7 +10,7 @@ const redis = new Redis({
 export const baseRateLimit = new Ratelimit({
 	redis,
 	limiter: Ratelimit.slidingWindow(100, "1 m"), // 100 requests per minute
-	analytics: true,
+	analytics: false,
 	prefix: "rate-limit",
 });
 

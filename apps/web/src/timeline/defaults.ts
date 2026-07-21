@@ -2,7 +2,7 @@ import { DEFAULT_NEW_ELEMENT_DURATION } from "@/timeline/creation";
 import type { TTimelineViewState } from "@/project/types";
 import type { BlendMode, Transform } from "@/rendering";
 import { ZERO_MEDIA_TIME } from "@/wasm";
-import type { TextElement } from "./types";
+import type { PlainTextElement } from "./types";
 
 const defaultTransform: Transform = {
 	scaleX: 1,
@@ -28,7 +28,7 @@ const defaultTextBackground = {
 	offsetY: 0,
 };
 
-const defaultTextElement: Omit<TextElement, "id"> = {
+const defaultTextElement: Omit<PlainTextElement, "id"> = {
 	type: "text",
 	name: "Text",
 	duration: DEFAULT_NEW_ELEMENT_DURATION,

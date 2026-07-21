@@ -1,0 +1,16 @@
+[package]
+name = "openchatcut-domain"
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-only"
+description = "Pure, versioned project domain and edit operation engine for OpenChatCut"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+quick-xml = "0.38.4"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+sha2 = "0.10.9"
+thiserror = "2.0.18"

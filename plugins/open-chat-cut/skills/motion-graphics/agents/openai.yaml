@@ -1,0 +1,4 @@
+interface:
+  display_name: "Motion Graphics"
+  short_description: "Create editable sandboxed motion graphics"
+  default_prompt: "Create an editable lower third that matches this project style."

@@ -18,22 +18,23 @@ export function StoragePersistenceDialog() {
 		<Dialog open={showDialog} onOpenChange={(open) => !open && onDismiss()}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>Don't lose your projects</DialogTitle>
+					<DialogTitle>Keep the browser cache available</DialogTitle>
 				</DialogHeader>
 				<DialogBody>
 					<p className="text-base text-muted-foreground">
-						Your browser can automatically delete your projects when storage
-						runs low.
+						Your projects and managed media are already safe in the local
+						daemon.
 					</p>
 					<p className="text-base text-muted-foreground">
-						Allow OpenCut to protect them?
+						Allow OpenChatCut to retain its optional browser preview and
+						migration cache when storage runs low?
 					</p>
 				</DialogBody>
 				<DialogFooter>
 					<Button variant="outline" onClick={onDismiss}>
 						Not now
 					</Button>
-					<Button onClick={onConfirm}>Allow</Button>
+					<Button onClick={onConfirm}>Allow cache</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

@@ -189,8 +189,21 @@ export class InsertElementCommand extends Command {
 			}
 		}
 
-		if (element.type === "text" && !element.params.content) {
+		if (
+			element.type === "text" &&
+			element.semanticType !== "caption" &&
+			!element.params.content
+		) {
 			console.error("Text element must have content");
+			return false;
+		}
+
+		if (
+			element.type === "text" &&
+			element.semanticType === "caption" &&
+			element.cues.length === 0
+		) {
+			console.error("Caption element must contain cues");
 			return false;
 		}
 

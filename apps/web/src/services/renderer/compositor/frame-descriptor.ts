@@ -25,7 +25,7 @@ import type {
 	TextureCanvasDrawFn,
 	TextureUploadDescriptor,
 } from "./types";
-import { DEFAULT_GRAPHIC_SOURCE_SIZE } from "@/graphics";
+import { SCENE_CLEAR_COLOR } from "./clear-color";
 
 export async function buildFrameDescriptor({
 	node,
@@ -56,7 +56,12 @@ export async function buildFrameDescriptor({
 			width: renderer.width,
 			height: renderer.height,
 			clear: {
-				color: [0, 0, 0, 1],
+				// The project background is represented by explicit scene nodes.
+				// Keeping the compositor clear transparent is what lets PNG and
+				// ProRes 4444 exports preserve alpha when the project background is
+				// configured as transparent. Opaque delivery formats flatten this
+				// channel during their FFmpeg conversion.
+				color: SCENE_CLEAR_COLOR,
 			},
 			items,
 		},
@@ -224,20 +229,21 @@ async function collectVisualSourceNode({
 
 	const source =
 		node instanceof GraphicNode
-			? node.getSource({ resolvedParams: node.resolved.resolvedParams })
+			? await node.getSource({
+					resolvedParams: node.resolved.resolvedParams,
+					localTime: node.resolved.localTime,
+				})
 			: node.resolved.source;
 	if (!source) {
 		return;
 	}
 
-	const sourceWidth =
-		node instanceof GraphicNode
-			? DEFAULT_GRAPHIC_SOURCE_SIZE
-			: (node.resolved as ResolvedVisualSourceNodeState).sourceWidth;
-	const sourceHeight =
-		node instanceof GraphicNode
-			? DEFAULT_GRAPHIC_SOURCE_SIZE
-			: (node.resolved as ResolvedVisualSourceNodeState).sourceHeight;
+	const sourceWidth = node instanceof GraphicNode
+		? node.sourceSize.width
+		: (node.resolved as ResolvedVisualSourceNodeState).sourceWidth;
+	const sourceHeight = node instanceof GraphicNode
+		? node.sourceSize.height
+		: (node.resolved as ResolvedVisualSourceNodeState).sourceHeight;
 
 	const textureId = `${path}:source`;
 	textures.set(textureId, {

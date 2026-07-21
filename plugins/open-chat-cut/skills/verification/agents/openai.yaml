@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify Project"
+  short_description: "Preview and validate edits before delivery"
+  default_prompt: "Render representative preview frames and validate this project."

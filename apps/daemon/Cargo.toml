@@ -1,0 +1,48 @@
+[package]
+name = "openchatcut-daemon"
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-only"
+publish = false
+
+[lib]
+name = "openchatcut_daemon"
+path = "src/lib.rs"
+
+[[bin]]
+name = "openchatcutd"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0"
+async-stream = "0.3"
+base64 = "0.22"
+axum = { version = "0.8", features = ["http1", "json", "tokio", "ws"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
+clap = { version = "4.5", features = ["derive", "env"] }
+dirs = "6.0"
+futures-core = "0.3"
+futures-util = "0.3"
+hex = "0.4"
+libc = "0.2"
+openchatcut-domain = { path = "../../rust/crates/openchatcut-domain" }
+rand = "0.9"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+scraper = "0.27"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "sqlite"] }
+subtle = "2.6"
+thiserror = "2.0"
+tokio = { version = "1.48", features = ["fs", "io-util", "macros", "net", "process", "rt-multi-thread", "signal", "sync", "time"] }
+tower = { version = "0.5", features = ["util"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+url = "2.5"
+uuid = { version = "1.18", features = ["serde", "v4"] }
+zip = { version = "4.3", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+tempfile = "3.23"

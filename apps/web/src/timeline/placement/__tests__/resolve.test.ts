@@ -14,7 +14,7 @@ import type {
 } from "@/timeline";
 import type { Transform } from "@/rendering";
 import { resolveTrackPlacement } from "@/timeline/placement";
-import { mediaTime, ZERO_MEDIA_TIME } from "@/wasm";
+import { mediaTime, roundMediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
 function buildTransform(): Transform {
 	return {
@@ -241,8 +241,10 @@ function buildTimeSpan({
 	excludeElementId?: string;
 }) {
 	return {
-		startTime: mediaTime({ ticks: startTime }),
-		duration: mediaTime({ ticks: duration }),
+		// Placement callers may derive spans from fractional UI values; normalize
+		// those values at the test boundary just like the production time helpers.
+		startTime: roundMediaTime({ time: startTime }),
+		duration: roundMediaTime({ time: duration }),
 		excludeElementId,
 	};
 }
@@ -648,7 +650,7 @@ describe("resolveTrackPlacement", () => {
 			trackId: "video-main",
 			trackIndex: 0,
 			trackType: "video",
-			adjustedStartTime: 0,
+			adjustedStartTime: ZERO_MEDIA_TIME,
 		});
 	});
 

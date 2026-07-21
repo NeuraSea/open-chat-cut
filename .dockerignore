@@ -1,5 +1,12 @@
 node_modules
+**/node_modules
 .next
+**/.next
+target
+.venv
+**/.venv
+dist
+coverage
 .git
 .gitignore
 *.md

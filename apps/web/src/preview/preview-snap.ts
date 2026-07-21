@@ -60,7 +60,21 @@ function pickClosestScaleCandidate<T extends { distance: number; edge: ScaleEdge
 			edge: bestCandidate.edge,
 		});
 
-		return shouldPreferCandidate && !shouldPreferBestCandidate
+		if (shouldPreferCandidate !== shouldPreferBestCandidate) {
+			return shouldPreferCandidate ? candidate : bestCandidate;
+		}
+
+		// When both sides are equally close (the common centered-mask case),
+		// prefer the active/right or bottom handle deterministically. This keeps
+		// the guide aligned with the edge the user is manipulating rather than
+		// arbitrarily selecting the first candidate in target order.
+		const edgePriority: Record<ScaleEdge, number> = {
+			right: 4,
+			bottom: 3,
+			left: 2,
+			top: 1,
+		};
+		return edgePriority[candidate.edge] > edgePriority[bestCandidate.edge]
 			? candidate
 			: bestCandidate;
 	});
@@ -315,52 +329,9 @@ export function snapScale({
 		return { snappedScale: proposedScale, activeLines: [] };
 	}
 
-	const snappedLeft = position.x - aabbBaseHalfW * best.scale;
-	const snappedRight = position.x + aabbBaseHalfW * best.scale;
-	const snappedTop = position.y - aabbBaseHalfH * best.scale;
-	const snappedBottom = position.y + aabbBaseHalfH * best.scale;
-
-	const activeLines: SnapLine[] = [];
-	const seenKeys = new Set<string>();
-
-	function addLine({ line }: { line: SnapLine }) {
-		const key = `${line.type}-${line.position}`;
-		if (!seenKeys.has(key)) {
-			seenKeys.add(key);
-			activeLines.push(line);
-		}
-	}
-
-	for (const target of verticalTargets) {
-		if (
-			(hasPreferredEdge({ preferredEdges, edge: "left" }) &&
-				Math.abs(snappedLeft - target.position) <= 1) ||
-			(hasPreferredEdge({ preferredEdges, edge: "right" }) &&
-				Math.abs(snappedRight - target.position) <= 1) ||
-			(!preferredEdges &&
-				(Math.abs(snappedLeft - target.position) <= 1 ||
-					Math.abs(snappedRight - target.position) <= 1))
-		) {
-			addLine({ line: target.line });
-		}
-	}
-	for (const target of horizontalTargets) {
-		if (
-			(hasPreferredEdge({ preferredEdges, edge: "top" }) &&
-				Math.abs(snappedTop - target.position) <= 1) ||
-			(hasPreferredEdge({ preferredEdges, edge: "bottom" }) &&
-				Math.abs(snappedBottom - target.position) <= 1) ||
-			(!preferredEdges &&
-				(Math.abs(snappedTop - target.position) <= 1 ||
-					Math.abs(snappedBottom - target.position) <= 1))
-		) {
-			addLine({ line: target.line });
-		}
-	}
-
 	return {
 		snappedScale: best.scale,
-		activeLines,
+		activeLines: best.lines,
 	};
 }
 

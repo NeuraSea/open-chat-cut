@@ -1,8 +1,9 @@
 {
-	"name": "OpenCut",
-	"description": "A simple but powerful video editor that gets the job done. In your browser.",
+	"name": "OpenChatCut",
+	"short_name": "OpenChatCut",
+	"description": "A local-first, agentic, open-source video editor.",
 	"display": "standalone",
-	"start_url": "/",
+	"start_url": "/projects",
 	"icons": [
 		{
 			"src": "/icons/android-icon-36x36.png",

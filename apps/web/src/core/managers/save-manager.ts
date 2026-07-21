@@ -8,6 +8,7 @@ export class SaveManager {
 	private debounceMs: number;
 	private isPaused = false;
 	private isSaving = false;
+	private savePromise: Promise<void> | null = null;
 	private hasPendingSave = false;
 	private saveTimer: ReturnType<typeof setTimeout> | null = null;
 	private unsubscribeHandlers: Array<() => void> = [];
@@ -64,44 +65,78 @@ export class SaveManager {
 
 	async flush(): Promise<void> {
 		this.hasPendingSave = true;
-		await this.saveNow();
+		this.clearTimer();
+		// A flush is a durability barrier, not merely a request to start saving.
+		// If autosave is already in flight, wait for it and then persist any edits
+		// that arrived while that snapshot was being written.
+		do {
+			if (!(await this.saveNow())) break;
+		} while (this.hasPendingSave && !this.isPaused);
 	}
 
 	getIsDirty(): boolean {
 		return this.hasPendingSave || this.isSaving;
 	}
 
+	/**
+	 * Drop a queued browser snapshot before replacing the editor with an
+	 * authoritative daemon revision. Loading is used after Agent undo/redo and
+	 * on a fresh page boot; replaying the old local snapshot at that boundary
+	 * would create a phantom revision and make the restored history action fail
+	 * its CAS check.
+	 */
+	discardPending(): void {
+		if (this.isSaving) return;
+		this.hasPendingSave = false;
+		this.clearTimer();
+	}
+
 	private queueSave(): void {
+		if (this.isPaused) return;
 		if (this.isSaving) return;
 		if (this.saveTimer) {
 			clearTimeout(this.saveTimer);
 		}
 		this.saveTimer = setTimeout(() => {
-			void this.saveNow();
+			void this.saveNow().catch((error: unknown) => {
+				console.error("Autosave failed:", error);
+			});
 		}, this.debounceMs);
 	}
 
-	private async saveNow(): Promise<void> {
-		if (this.isSaving) return;
-		if (!this.hasPendingSave) return;
+	private async saveNow(): Promise<boolean> {
+		if (this.savePromise) {
+			await this.savePromise;
+			return true;
+		}
+		if (!this.hasPendingSave) return false;
 
 		const activeProject = this.editor.project.getActive();
-		if (!activeProject) return;
-		if (this.editor.project.getIsLoading()) return;
-		if (this.editor.project.getMigrationState().isMigrating) return;
+		if (!activeProject) return false;
+		if (this.editor.project.getIsLoading()) return false;
+		if (this.editor.project.getMigrationState().isMigrating) return false;
 
-		this.isSaving = true;
-		this.hasPendingSave = false;
-		this.clearTimer();
+		const save = async () => {
+			this.isSaving = true;
+			this.hasPendingSave = false;
+			this.clearTimer();
 
-		try {
-			await this.editor.project.saveCurrentProject();
-		} finally {
-			this.isSaving = false;
-			if (this.hasPendingSave) {
-				this.queueSave();
+			try {
+				await this.editor.project.saveCurrentProject();
+			} catch (error) {
+				this.hasPendingSave = true;
+				throw error;
+			} finally {
+				this.isSaving = false;
+				this.savePromise = null;
+				if (this.hasPendingSave && !this.isPaused) {
+					this.queueSave();
+				}
 			}
-		}
+		};
+		this.savePromise = save();
+		await this.savePromise;
+		return true;
 	}
 
 	private clearTimer(): void {

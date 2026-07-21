@@ -37,6 +37,28 @@ const FULLSCREEN_QUAD_POSITIONS: [[f32; 2]; 6] = [
     [1.0, 1.0],
 ];
 
+fn preferred_surface_alpha_mode(
+    backend: wgpu::Backend,
+    supported: &[wgpu::CompositeAlphaMode],
+) -> wgpu::CompositeAlphaMode {
+    // wgpu's browser WebGPU backend currently advertises only Opaque even
+    // though GPUCanvasContext accepts Premultiplied and maps that enum itself.
+    // Requesting it explicitly is required for the compositor canvas to keep
+    // the transparent pixels used by PNG and ProRes 4444 exports.
+    if backend == wgpu::Backend::BrowserWebGpu {
+        return wgpu::CompositeAlphaMode::PreMultiplied;
+    }
+    [
+        wgpu::CompositeAlphaMode::PreMultiplied,
+        wgpu::CompositeAlphaMode::PostMultiplied,
+        wgpu::CompositeAlphaMode::Auto,
+    ]
+    .into_iter()
+    .find(|candidate| supported.contains(candidate))
+    .or_else(|| supported.first().copied())
+    .unwrap_or(wgpu::CompositeAlphaMode::Auto)
+}
+
 pub struct GpuContext {
     instance: wgpu::Instance,
     adapter: wgpu::Adapter,
@@ -431,11 +453,10 @@ impl GpuContext {
             width,
             height,
             present_mode: wgpu::PresentMode::Fifo,
-            alpha_mode: caps
-                .alpha_modes
-                .first()
-                .copied()
-                .unwrap_or(wgpu::CompositeAlphaMode::Auto),
+            alpha_mode: preferred_surface_alpha_mode(
+                self.adapter.get_info().backend,
+                &caps.alpha_modes,
+            ),
             view_formats: vec![],
             desired_maximum_frame_latency: 2,
         })
@@ -691,5 +712,37 @@ impl GpuContext {
             .map_err(|_| GpuError::AdapterUnavailable)?;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::preferred_surface_alpha_mode;
+    use wgpu::{Backend, CompositeAlphaMode};
+
+    #[test]
+    fn browser_webgpu_requests_premultiplied_alpha_despite_opaque_capability_report() {
+        assert_eq!(
+            preferred_surface_alpha_mode(Backend::BrowserWebGpu, &[CompositeAlphaMode::Opaque]),
+            CompositeAlphaMode::PreMultiplied
+        );
+    }
+
+    #[test]
+    fn native_surface_prefers_supported_alpha_preserving_mode() {
+        assert_eq!(
+            preferred_surface_alpha_mode(
+                Backend::Metal,
+                &[
+                    CompositeAlphaMode::Opaque,
+                    CompositeAlphaMode::PostMultiplied,
+                ],
+            ),
+            CompositeAlphaMode::PostMultiplied
+        );
+        assert_eq!(
+            preferred_surface_alpha_mode(Backend::Gl, &[CompositeAlphaMode::Opaque]),
+            CompositeAlphaMode::Opaque
+        );
     }
 }

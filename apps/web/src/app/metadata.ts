@@ -17,7 +17,7 @@ export const baseMetaData: Metadata = {
 				url: SITE_INFO.openGraphImage,
 				width: 1200,
 				height: 630,
-				alt: "OpenCut Wordmark",
+				alt: "OpenChatCut",
 			},
 		],
 	},
@@ -25,15 +25,14 @@ export const baseMetaData: Metadata = {
 		card: "summary_large_image",
 		title: SITE_INFO.title,
 		description: SITE_INFO.description,
-		creator: "@opencutapp",
 		images: [SITE_INFO.twitterImage],
 	},
 	pinterest: {
 		richPin: false,
 	},
 	robots: {
-		index: true,
-		follow: true,
+		index: false,
+		follow: false,
 	},
 	icons: {
 		icon: [

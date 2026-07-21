@@ -1,90 +1,89 @@
 services:
-  db:
-    image: postgres:17
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: opencut
-      POSTGRES_PASSWORD: opencut
-      POSTGRES_DB: opencut
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U opencut"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
-  serverless-redis-http:
-    image: hiett/serverless-redis-http:latest
-    ports:
-      - "8079:80"
-    environment:
-      SRH_MODE: env
-      SRH_TOKEN: example_token
-      SRH_CONNECTION_STRING: "redis://redis:6379"
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:80 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
   web:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
       args:
-        - FREESOUND_CLIENT_ID=${FREESOUND_CLIENT_ID}
-        - FREESOUND_API_KEY=${FREESOUND_API_KEY}
-        - NEXT_PUBLIC_MARBLE_API_URL=${NEXT_PUBLIC_MARBLE_API_URL:-https://api.marblecms.com}
-        - MARBLE_WORKSPACE_KEY=${MARBLE_WORKSPACE_KEY:-build-placeholder}
+        NEXT_PUBLIC_OPENCHATCUT_API_URL: ${NEXT_PUBLIC_OPENCHATCUT_API_URL:-http://127.0.0.1:3210/api/v1}
     restart: unless-stopped
     ports:
-      - "3100:3000"
+      - "127.0.0.1:${OPENCHATCUT_WEB_PORT:-3100}:3000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://opencut:opencut@db:5432/opencut
-      - BETTER_AUTH_SECRET=your-production-secret-key-here
-      - UPSTASH_REDIS_REST_URL=http://serverless-redis-http:80
-      - UPSTASH_REDIS_REST_TOKEN=example_token
-      - NEXT_PUBLIC_SITE_URL=http://localhost:3100
-      - NEXT_PUBLIC_MARBLE_API_URL=https://api.marblecms.com
-      - MARBLE_WORKSPACE_KEY=${MARBLE_WORKSPACE_KEY:-placeholder}
-      - FREESOUND_CLIENT_ID=${FREESOUND_CLIENT_ID}
-      - FREESOUND_API_KEY=${FREESOUND_API_KEY}
-    depends_on:
-      db:
-        condition: service_healthy
-      serverless-redis-http:
-        condition: service_healthy
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:${OPENCHATCUT_WEB_PORT:-3100}
+      NEXT_PUBLIC_OPENCHATCUT_API_URL: ${NEXT_PUBLIC_OPENCHATCUT_API_URL:-http://127.0.0.1:3210/api/v1}
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
       start_period: 30s
 
-volumes:
-  postgres_data:
+  daemon:
+    profiles: ["full-cpu"]
+    build:
+      context: .
+      dockerfile: ./apps/daemon/Dockerfile.full
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3210:3210"
+    environment:
+      OPENCHATCUT_CONTAINERIZED: "true"
+      OPENCHATCUT_BIND: 0.0.0.0:3210
+      OPENCHATCUT_HOME: /runtime
+      OPENCHATCUT_DATA_DIR: /data
+      OPENCHATCUT_EDITOR_URL: http://127.0.0.1:${OPENCHATCUT_WEB_PORT:-3100}
+      OPENCHATCUT_WORKER_EDITOR_URL: http://web:3000
+      OPENCHATCUT_ALLOWED_ORIGINS: http://web:3000
+      OPENCHATCUT_IMPORT_ROOTS: /imports
+      OPENCHATCUT_MEDIA_WORKER: /opt/openchatcut/venv/bin/openchatcut-media-worker
+      OPENCHATCUT_MG_RUNTIME_CLI: /opt/openchatcut/mg-runtime/src/cli.mjs
+      OPENCHATCUT_NODE_COMMAND: /usr/local/bin/node
+      OPENCHATCUT_VIDEO_ACCELERATION: cpu
+    volumes:
+      - openchatcut-data:/data
+      - openchatcut-runtime:/runtime
+      - openchatcut-imports:/imports
+
+  daemon-nvidia:
+    profiles: ["full-nvidia"]
+    build:
+      context: .
+      dockerfile: ./apps/daemon/Dockerfile.full
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3210:3210"
+    gpus: all
+    environment:
+      OPENCHATCUT_CONTAINERIZED: "true"
+      OPENCHATCUT_BIND: 0.0.0.0:3210
+      OPENCHATCUT_HOME: /runtime
+      OPENCHATCUT_DATA_DIR: /data
+      OPENCHATCUT_EDITOR_URL: http://127.0.0.1:${OPENCHATCUT_WEB_PORT:-3100}
+      OPENCHATCUT_WORKER_EDITOR_URL: http://web:3000
+      OPENCHATCUT_ALLOWED_ORIGINS: http://web:3000
+      OPENCHATCUT_IMPORT_ROOTS: /imports
+      OPENCHATCUT_MEDIA_WORKER: /opt/openchatcut/venv/bin/openchatcut-media-worker
+      OPENCHATCUT_MG_RUNTIME_CLI: /opt/openchatcut/mg-runtime/src/cli.mjs
+      OPENCHATCUT_NODE_COMMAND: /usr/local/bin/node
+      OPENCHATCUT_VIDEO_ACCELERATION: nvidia
+    volumes:
+      - openchatcut-data:/data
+      - openchatcut-runtime:/runtime
+      - openchatcut-imports:/imports
 
 networks:
   default:
-    name: opencut-network
+    name: openchatcut-web
+
+volumes:
+  openchatcut-data:
+  openchatcut-runtime:
+  openchatcut-imports:

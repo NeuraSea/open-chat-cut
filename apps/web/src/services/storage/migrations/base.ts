@@ -13,4 +13,7 @@ export abstract class StorageMigration {
 		projectId,
 		project,
 	}: StorageMigrationRunArgs): Promise<MigrationResult<ProjectRecord>>;
+
+	/** Cleanup is intentionally separate so transformed data is durable first. */
+	async cleanup(_args: StorageMigrationRunArgs): Promise<void> {}
 }

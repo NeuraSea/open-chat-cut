@@ -39,6 +39,10 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { DiagnosticSeverity } from "@/diagnostics/types";
+import {
+	CAPTION_PRESETS,
+	DEFAULT_CAPTION_PRESET,
+} from "@/subtitles/caption-presets";
 
 const DIAGNOSTIC_BUTTON_VARIANT: Record<
 	DiagnosticSeverity,
@@ -86,6 +90,9 @@ function processingReducer(
 export function Captions() {
 	const [selectedLanguage, setSelectedLanguage] =
 		useState<TranscriptionLanguage>("auto");
+	const [selectedPresetId, setSelectedPresetId] = useState(
+		DEFAULT_CAPTION_PRESET.id,
+	);
 	const [processing, dispatch] = useReducer(processingReducer, IDLE_STATE);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -113,7 +120,11 @@ export function Captions() {
 	}: {
 		captions: CaptionChunk[];
 	}): boolean => {
-		const trackId = insertCaptionChunksAsTextTrack({ editor, captions });
+		const trackId = insertCaptionChunksAsTextTrack({
+			editor,
+			captions,
+			presetId: selectedPresetId,
+		});
 		return trackId !== null;
 	};
 
@@ -278,7 +289,7 @@ export function Captions() {
 			<input
 				ref={fileInputRef}
 				type="file"
-				accept=".srt,.ass"
+				accept=".srt,.vtt,.ass,.txt"
 				className="hidden"
 				onChange={(event) => void handleFileChange({ event })}
 			/>
@@ -302,6 +313,20 @@ export function Captions() {
 									{TRANSCRIPTION_LANGUAGES.map((language) => (
 										<SelectItem key={language.code} value={language.code}>
 											{language.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</SectionField>
+						<SectionField label="Style">
+							<Select value={selectedPresetId} onValueChange={setSelectedPresetId}>
+								<SelectTrigger>
+									<SelectValue placeholder="Select a caption style" />
+								</SelectTrigger>
+								<SelectContent>
+									{CAPTION_PRESETS.map((preset) => (
+										<SelectItem key={preset.id} value={preset.id}>
+											{preset.name}
 										</SelectItem>
 									))}
 								</SelectContent>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.openchatcut.comfyui</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__ROOT__/runtime/comfyui/.venv/bin/python</string>
+    <string>__ROOT__/runtime/comfyui/main.py</string>
+    <string>--base-directory</string>
+    <string>__ROOT__/runtime/comfyui</string>
+    <string>--listen</string>
+    <string>127.0.0.1</string>
+    <string>--port</string>
+    <string>8188</string>
+    <string>--disable-auto-launch</string>
+    <string>--preview-method</string>
+    <string>none</string>
+    <string>--temp-directory</string>
+    <string>__ROOT__/cache/comfyui</string>
+    <string>--output-directory</string>
+    <string>__ROOT__/output/comfyui</string>
+    <string>--user-directory</string>
+    <string>__ROOT__/config/comfyui-user</string>
+    <string>--database-url</string>
+    <string>sqlite:///__ROOT__/config/comfyui.sqlite3</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HF_HOME</key>
+    <string>__ROOT__/cache/huggingface</string>
+    <key>PYTORCH_ENABLE_MPS_FALLBACK</key>
+    <string>1</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>__LOG_ROOT__/comfyui.log</string>
+  <key>StandardErrorPath</key>
+  <string>__LOG_ROOT__/comfyui.err.log</string>
+  <key>SoftResourceLimits</key>
+  <dict>
+    <key>NumberOfFiles</key>
+    <integer>65536</integer>
+  </dict>
+</dict>
+</plist>

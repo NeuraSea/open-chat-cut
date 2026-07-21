@@ -1,7 +1,6 @@
 import { webEnv } from "@/env/web";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { checkRateLimit } from "@/auth/rate-limit";
 
 const searchParamsSchema = z.object({
 	q: z.string().max(500, "Query too long").optional(),
@@ -149,11 +148,6 @@ function transformFreesoundResult(
 
 export async function GET(request: NextRequest) {
 	try {
-		const { limited } = await checkRateLimit({ request });
-		if (limited) {
-			return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-		}
-
 		const { searchParams } = new URL(request.url);
 
 		const validationResult = searchParamsSchema.safeParse({
@@ -193,6 +187,16 @@ export async function GET(request: NextRequest) {
 						"Song search functionality is coming soon. Try searching for sound effects instead.",
 				},
 				{ status: 501 },
+			);
+		}
+
+		if (!webEnv.FREESOUND_API_KEY) {
+			return NextResponse.json(
+				{
+					error: "Stock sound search is not configured",
+					message: "Set FREESOUND_API_KEY to enable the optional local proxy.",
+				},
+				{ status: 503 },
 			);
 		}
 

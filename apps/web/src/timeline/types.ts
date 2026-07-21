@@ -111,6 +111,13 @@ interface BaseTimelineElement {
 	trimEnd: MediaTime;
 	sourceDuration?: MediaTime;
 	animations?: ElementAnimations;
+	storyCrossfade?: {
+		version: 1;
+		fadeInTicks: MediaTime;
+		fadeOutTicks: MediaTime;
+		curve: "equalPower";
+		preservesLinkedAvTiming: true;
+	};
 	params: ParamValues;
 }
 
@@ -132,11 +139,52 @@ export interface ImageElement extends BaseTimelineElement {
 	masks?: Mask[];
 }
 
-export interface TextElement extends BaseTimelineElement {
+export interface PlainTextElement extends BaseTimelineElement {
 	type: "text";
+	semanticType?: "text";
 	hidden?: boolean;
 	effects?: Effect[];
 }
+
+export interface CaptionWord {
+	id: string;
+	/** Immutable transcription text. */
+	spokenText: string;
+	/** User-correctable text used by caption rendering and export. */
+	displayText: string;
+	/** Time relative to the CaptionElement start. */
+	startTime: MediaTime;
+	/** Time relative to the CaptionElement start. */
+	endTime: MediaTime;
+	transcriptWordId?: string;
+}
+
+export interface CaptionCue {
+	id: string;
+	startTime: MediaTime;
+	endTime: MediaTime;
+	words: CaptionWord[];
+	speakerId?: string;
+	translation?: string;
+}
+
+export interface CaptionElement extends BaseTimelineElement {
+	type: "text";
+	semanticType: "caption";
+	transcriptId: string;
+	language?: string;
+	translationLanguage?: string;
+	stylePresetId: string;
+	maxLines: number;
+	maxCharactersPerLine: number;
+	wordHighlight: boolean;
+	highlightColor: string;
+	cues: CaptionCue[];
+	hidden?: boolean;
+	effects?: Effect[];
+}
+
+export type TextElement = PlainTextElement | CaptionElement;
 
 export interface StickerElement extends BaseTimelineElement {
 	type: "sticker";
@@ -151,6 +199,7 @@ export interface StickerElement extends BaseTimelineElement {
 export interface GraphicElement extends BaseTimelineElement {
 	type: "graphic";
 	definitionId: string;
+	motionGraphic?: import("@/motion-graphics/types").MotionGraphicDefinition;
 	hidden?: boolean;
 	effects?: Effect[];
 	masks?: Mask[];
@@ -212,7 +261,8 @@ export type CreateAudioElement =
 	| CreateLibraryAudioElement;
 export type CreateVideoElement = Omit<VideoElement, "id">;
 export type CreateImageElement = Omit<ImageElement, "id">;
-export type CreateTextElement = Omit<TextElement, "id">;
+export type CreateTextElement = Omit<PlainTextElement, "id">;
+export type CreateCaptionElement = Omit<CaptionElement, "id">;
 export type CreateStickerElement = Omit<StickerElement, "id">;
 export type CreateGraphicElement = Omit<GraphicElement, "id">;
 export type CreateEffectElement = Omit<EffectElement, "id">;
@@ -221,6 +271,7 @@ export type CreateTimelineElement =
 	| CreateVideoElement
 	| CreateImageElement
 	| CreateTextElement
+	| CreateCaptionElement
 	| CreateStickerElement
 	| CreateGraphicElement
 	| CreateEffectElement;

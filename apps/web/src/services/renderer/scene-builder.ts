@@ -146,6 +146,8 @@ function buildTrackNodes({
 					new GraphicNode({
 						definitionId: element.definitionId,
 						params: element.params,
+						motionGraphic: element.motionGraphic,
+						mediaMap,
 						duration: element.duration,
 						timeOffset: element.startTime,
 						trimStart: element.trimStart,

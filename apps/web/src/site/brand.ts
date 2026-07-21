@@ -1,13 +1,13 @@
-export const SITE_URL = "https://opencut.app";
+export const SITE_URL = "http://127.0.0.1:3100";
 
 export const SITE_INFO = {
-	title: "OpenCut",
+	title: "OpenChatCut",
 	description:
-		"A simple but powerful video editor that gets the job done. In your browser.",
+		"A local-first, agentic, open-source video editor.",
 	url: SITE_URL,
 	openGraphImage: "/open-graph/default.jpg",
 	twitterImage: "/open-graph/default.jpg",
 	favicon: "/favicon.ico",
 };
 
-export const DEFAULT_LOGO_URL = "/logos/opencut/svg/logo.svg";
+export const DEFAULT_LOGO_URL = "/logos/openchatcut/logo.svg";

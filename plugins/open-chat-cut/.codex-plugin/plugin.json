@@ -1,0 +1,39 @@
+{
+  "name": "open-chat-cut",
+  "version": "0.1.0",
+  "description": "Operate the local OpenChatCut editor through a loopback-only Codex MCP bridge.",
+  "author": {
+    "name": "OpenChatCut contributors"
+  },
+  "license": "AGPL-3.0-only",
+  "keywords": [
+    "video-editing",
+    "captions",
+    "transcription",
+    "motion-graphics",
+    "local-first"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "OpenChatCut",
+    "shortDescription": "Edit local video projects with Codex",
+    "longDescription": "Connect Codex to a locally running OpenChatCut daemon to inspect projects, plan and apply revision-safe edits, transcribe speech, create captions and motion graphics, generate media, clean audio, preview changes, and export pinned revisions.",
+    "developerName": "OpenChatCut contributors",
+    "category": "Creativity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Remove filler words and long pauses, then add readable captions",
+      "Turn this long recording into a polished short with B-roll",
+      "Validate the current revision and export a delivery-ready MP4"
+    ],
+    "brandColor": "#7C3AED",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/logo.svg",
+    "screenshots": []
+  }
+}

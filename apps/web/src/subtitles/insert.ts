@@ -4,15 +4,17 @@ import {
 	BatchCommand,
 	InsertElementCommand,
 } from "@/commands";
-import { buildSubtitleTextElement } from "./build-subtitle-text-element";
+import { buildSemanticCaptionElement } from "./build-caption-element";
 import type { SubtitleCue } from "./types";
 
 export function insertCaptionChunksAsTextTrack({
 	editor,
 	captions,
+	presetId,
 }: {
 	editor: EditorCore;
 	captions: SubtitleCue[];
+	presetId?: string;
 }): string | null {
 	if (captions.length === 0) {
 		return null;
@@ -21,19 +23,12 @@ export function insertCaptionChunksAsTextTrack({
 	const addTrackCommand = new AddTrackCommand({ type: "text", index: 0 });
 	const trackId = addTrackCommand.getTrackId();
 	const canvasSize = editor.project.getActive().settings.canvasSize;
-	const insertCommands = captions.map(
-		(caption, index) =>
-			new InsertElementCommand({
-				placement: { mode: "explicit", trackId },
-				element: buildSubtitleTextElement({
-					index,
-					caption,
-					canvasSize,
-				}),
-			}),
-	);
+	const insertCommand = new InsertElementCommand({
+		placement: { mode: "explicit", trackId },
+		element: buildSemanticCaptionElement({ captions, canvasSize, presetId }),
+	});
 	editor.command.execute({
-		command: new BatchCommand([addTrackCommand, ...insertCommands]),
+		command: new BatchCommand([addTrackCommand, insertCommand]),
 	});
 
 	return trackId;

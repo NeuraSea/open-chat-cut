@@ -1,0 +1,4 @@
+interface:
+  display_name: "Speech Edit"
+  short_description: "Transcribe and edit talking-head footage"
+  default_prompt: "Remove filler words and long pauses from this project after showing the edit plan."
