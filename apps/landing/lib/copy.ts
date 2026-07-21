@@ -5,8 +5,8 @@ export const repository = "https://github.com/NeuraSea/open-chat-cut";
 export const copy = {
 	en: {
 		locale: "en" as const,
-		altHref: "/zh/", altLabel: "中文", docsHref: "/docs/",
-		nav: ["Workflow", "Local AI", "Pricing"],
+		altHref: "/zh/", altLabel: "中文", docsHref: "/docs/", pluginHref: "/codex-plugin/",
+		nav: ["Workflow", "Codex Plugin", "Local AI", "Pricing"],
 		badge: "NEW", badgeText: "Fumadocs-powered docs are live",
 		headline: "Edit at the speed of intent.",
 		lead: "Tell the agent what the story needs. Review a precise plan, approve the diff, and keep every result editable on a real local timeline.",
@@ -37,8 +37,8 @@ export const copy = {
 	},
 	zh: {
 		locale: "zh" as const,
-		altHref: "/", altLabel: "English", docsHref: "/zh/docs/",
-		nav: ["工作流", "本地 AI", "价格"],
+		altHref: "/", altLabel: "English", docsHref: "/zh/docs/", pluginHref: "/zh/codex-plugin/",
+		nav: ["工作流", "Codex 插件", "本地 AI", "价格"],
 		badge: "新", badgeText: "Fumadocs 文档中心已上线",
 		headline: "用表达意图的速度剪辑。",
 		lead: "告诉 Agent 你想讲什么故事，审核清晰的计划和差异，再把每个结果保留在真实、本地、可继续编辑的时间线上。",

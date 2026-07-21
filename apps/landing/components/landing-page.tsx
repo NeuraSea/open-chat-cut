@@ -11,7 +11,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
 	return <div className="landing-shell">
 		<header className="site-nav"><div className="nav-inner">
 			<Brand href={locale === "zh" ? "/zh/" : "/"} />
-			<nav className="nav-links" aria-label="Primary"><a href="#workflow">{c.nav[0]}</a><a href="#local">{c.nav[1]}</a><a href="#pricing">{c.nav[2]}</a></nav>
+			<nav className="nav-links" aria-label="Primary"><a href="#workflow">{c.nav[0]}</a><Link href={c.pluginHref}>{c.nav[1]}</Link><a href="#local">{c.nav[2]}</a><a href="#pricing">{c.nav[3]}</a></nav>
 			<div className="nav-actions"><Link className="nav-button hide-mobile" href={c.altHref}>{c.altLabel}</Link><Link className="nav-button hide-mobile" href={c.docsHref}>Docs</Link><a className="nav-button primary" href={repository}>GitHub ↗</a></div>
 		</div></header>
 

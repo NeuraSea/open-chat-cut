@@ -1,0 +1,83 @@
+---
+title: Codex 插件
+description: 安装本地 marketplace 插件，并通过 revision-safe MCP 工具编辑 OpenChatCut 项目。
+---
+
+OpenChatCut Codex 插件把已经登录的 Codex Desktop 或 CLI 会话连接到本地 `openchatcutd` daemon。插件包含 **25 个 MCP 工具**与 **10 个专注 Skills**，覆盖剪辑、字幕、MG、生成、音频和交付。
+
+## 可以完成什么
+
+| 领域 | 能力 |
+| --- | --- |
+| 项目 | 创建、列出和检查项目，并打开对应 Web 编辑器 |
+| 媒体 | 导入本地或远程媒体、检查素材并搜索 B-roll |
+| 时间线 | 验证 proposal、应用语义操作并读取 revision 历史 |
+| 语音 | 转录、查看逐词脚本并应用七类文字稿编辑 |
+| 字幕 | 创建或批量调整同步字幕，不把它们永久展开成文本框 |
+| 动态图形 | 通过安全 MG DSL 创建可编辑 lower third、卡片、callout 和图表 |
+| 素材生成 | 查询 Provider，生成带 provenance 的受管本地素材 |
+| 交付 | 渲染预览帧、验证项目、导出固定 revision 并跟踪任务 |
+
+## 前置条件
+
+- 已安装 OpenChatCut，并且本地 `openchatcutd` 正在运行
+- Node.js 20+
+- Codex CLI 或 Codex Desktop，并已运行 `codex login`
+
+插件复用现有 Codex 登录状态，**不会**读取或复制 Codex 认证文件。
+
+## 随 OpenChatCut 一起安装
+
+一条命令会设置本地运行时，并安装仓库 marketplace 插件：
+
+```bash
+git clone https://github.com/NeuraSea/open-chat-cut.git
+cd open-chat-cut
+./scripts/install.sh
+```
+
+Windows PowerShell：
+
+```powershell
+git clone https://github.com/NeuraSea/open-chat-cut.git
+cd open-chat-cut
+.\scripts\install.ps1
+```
+
+只安装或更新插件：
+
+```bash
+./scripts/install-codex-plugin.sh
+```
+
+```powershell
+.\scripts\install-codex-plugin.ps1
+```
+
+## 必须完成的最后一步
+
+安装或更新后，请打开一个**新的 Codex 任务**。MCP server 与 Skills 会在任务启动时发现，因此安装任务本身不会自动获得刚安装的工具。
+
+可以从这个提示开始：
+
+```text
+创建一个 OpenChatCut 项目并打开编辑器，先解释你可以如何帮助我完成
+语音清理、字幕、B-roll、MG、素材生成、音频与导出。
+在应用任何语义编辑前，先询问我拥有哪些素材。
+```
+
+## 审批与 revision 安全
+
+只读检查、验证和预览可以自动执行。时间线写入需要当前 expected revision、幂等键和已验证 proposal。语义删减、素材外发与付费生成仍然需要确认。
+
+零依赖 STDIO bridge 只读取受保护的 daemon runtime descriptor 和 bearer token，不直接访问 SQLite、项目 JSON 或 Provider 密钥。
+
+## 验证安装
+
+```bash
+codex plugin marketplace list
+codex plugin list --marketplace openchatcut-local
+node --test plugins/open-chat-cut/tests/*.test.mjs
+```
+
+如果工具没有出现，请确认 daemon 正在运行，重新安装插件，然后再次打开新的 Codex 任务。

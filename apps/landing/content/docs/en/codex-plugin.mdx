@@ -1,0 +1,83 @@
+---
+title: Codex Plugin
+description: Install the local marketplace plugin and edit OpenChatCut projects through revision-safe MCP tools.
+---
+
+The OpenChatCut Codex plugin connects a signed-in Codex desktop or CLI session to the local `openchatcutd` daemon. It contributes **25 MCP tools** and **10 focused skills** for editing, captions, motion graphics, generation, audio and delivery.
+
+## What it can do
+
+| Domain | Capabilities |
+| --- | --- |
+| Projects | Create, list and inspect projects; open the matching Web editor |
+| Media | Import local or remote media, inspect assets and search B-roll |
+| Timeline | Validate a proposal, apply semantic operations and read revision history |
+| Speech | Transcribe, inspect word-level scripts and apply seven transcript edit types |
+| Captions | Create or restyle linked captions without flattening them into text boxes |
+| Motion graphics | Create editable lower thirds, cards, callouts and charts with the safe MG DSL |
+| Generation | Discover providers and generate managed assets with provenance |
+| Delivery | Render preview frames, validate a project, export a pinned revision and track jobs |
+
+## Prerequisites
+
+- A local OpenChatCut installation with `openchatcutd` running
+- Node.js 20+
+- Codex CLI or Codex desktop, signed in with `codex login`
+
+The plugin reuses the existing Codex login. It does **not** read or copy Codex authentication files.
+
+## Install with OpenChatCut
+
+The one-command installer sets up the local runtime and installs the repository marketplace plugin:
+
+```bash
+git clone https://github.com/NeuraSea/open-chat-cut.git
+cd open-chat-cut
+./scripts/install.sh
+```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/NeuraSea/open-chat-cut.git
+cd open-chat-cut
+.\scripts\install.ps1
+```
+
+To install or refresh only the plugin:
+
+```bash
+./scripts/install-codex-plugin.sh
+```
+
+```powershell
+.\scripts\install-codex-plugin.ps1
+```
+
+## Required final step
+
+After installation or update, open a **new Codex task**. MCP servers and skills are discovered when a task starts, so the installation task will not gain the newly installed tools retroactively.
+
+Try this first prompt:
+
+```text
+Create an OpenChatCut project, open its editor, and explain how you can help me
+with speech cleanup, captions, B-roll, motion graphics, generated assets, audio,
+and export. Ask what footage I have before applying any semantic edits.
+```
+
+## Approval and revision safety
+
+Read-only inspection, validation and preview are safe to run automatically. Timeline writes require the current expected revision, an idempotency key and a validated proposal. Semantic deletion, external media transfer and paid generation remain confirmation-gated.
+
+The dependency-free STDIO bridge reads only the protected daemon runtime descriptor and bearer token. It never accesses SQLite, project JSON or provider keys directly.
+
+## Verify the installation
+
+```bash
+codex plugin marketplace list
+codex plugin list --marketplace openchatcut-local
+node --test plugins/open-chat-cut/tests/*.test.mjs
+```
+
+If tools do not appear, confirm the daemon is running, reinstall the plugin, and start another new Codex task.

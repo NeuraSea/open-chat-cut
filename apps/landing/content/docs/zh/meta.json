@@ -1,4 +1,4 @@
 {
 	"title": "OpenChatCut",
-	"pages": ["index", "installation", "architecture"]
+	"pages": ["index", "installation", "codex-plugin", "architecture"]
 }

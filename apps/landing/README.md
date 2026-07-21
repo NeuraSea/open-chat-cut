@@ -6,6 +6,8 @@ not expose the local editor or daemon as a public SaaS service.
 
 - English: `/`
 - Simplified Chinese: `/zh/`
+- Codex plugin: `/codex-plugin/`
+- Codex 插件: `/zh/codex-plugin/`
 - English docs: `/docs/`
 - Simplified Chinese docs: `/zh/docs/`
 - Production domain: `https://open-chatcut.nervafs.xyz`
