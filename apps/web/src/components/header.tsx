@@ -16,7 +16,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { cn } from "@/utils/ui";
-import { DEFAULT_LOGO_URL, SITE_URL } from "@/site/brand";
+import { DEFAULT_LOGO_URL } from "@/site/brand";
 import { SOCIAL_LINKS } from "@/site/social";
 import {
 	ContextMenu,
@@ -30,6 +30,10 @@ export function Header() {
 	const closeMenu = () => setIsMenuOpen(false);
 
 	const links = [
+		{
+			label: "Pricing",
+			href: "/pricing",
+		},
 		{
 			label: "Roadmap",
 			href: "/roadmap",
@@ -57,11 +61,14 @@ export function Header() {
 							<Link href="/" className="flex items-center gap-3">
 								<Image
 									src={DEFAULT_LOGO_URL}
-									alt="OpenCut Logo"
+									alt="OpenChatCut Logo"
 									className="invert dark:invert-0"
 									width={32}
 									height={32}
 								/>
+								<span className="hidden text-sm font-semibold sm:inline">
+									OpenChatCut
+								</span>
 							</Link>
 						</ContextMenuTrigger>
 						<ContextMenuContent>
@@ -79,7 +86,7 @@ export function Header() {
 								onClick={() => {
 									const a = document.createElement("a");
 									a.href = DEFAULT_LOGO_URL;
-									a.download = "opencut-logo.svg";
+									a.download = "openchatcut-logo.svg";
 									a.click();
 								}}
 							>
@@ -121,7 +128,7 @@ export function Header() {
 						<Link href={SOCIAL_LINKS.github}>
 							<Button className="bg-background text-sm" variant="outline">
 								<HugeiconsIcon icon={GithubIcon} className="size-4" />
-								40k+
+								GitHub
 							</Button>
 						</Link>
 						<Link href="/projects">

@@ -1,3 +1,4 @@
+import type { Viewport } from "next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "../components/ui/sonner";
@@ -5,6 +6,11 @@ import { TooltipProvider } from "../components/ui/tooltip";
 import { baseMetaData } from "./metadata";
 
 export const metadata = baseMetaData;
+
+export const viewport: Viewport = {
+	width: "device-width",
+	initialScale: 1,
+};
 
 export default function RootLayout({
 	children,

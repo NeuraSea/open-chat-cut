@@ -1,0 +1,51 @@
+name: Creator License request
+description: Request the low-cost NeuraSea OpenChatCut Creator License
+title: "[LICENSE] Creator License request"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is public. Do not include legal names, client information, payment details, addresses, tax identifiers, or other confidential information. NeuraSea will provide a private order process after reviewing eligibility.
+  - type: checkboxes
+    id: eligibility
+    attributes:
+      label: Eligibility
+      description: Confirm every requirement for the Creator plan.
+      options:
+        - label: I am the only person who will use this OpenChatCut license.
+          required: true
+        - label: No employee, contractor, or other team member will use the licensed software.
+          required: true
+        - label: My total gross revenue during the preceding 12 months is below USD 100,000 or its local-currency equivalent.
+          required: true
+        - label: I do not need SaaS, hosted, managed-service, OEM, white-label, embedded, or redistribution rights.
+          required: true
+        - label: I have read CREATOR-LICENSE.md and understand that submitting this issue does not activate a license.
+          required: true
+  - type: dropdown
+    id: currency
+    attributes:
+      label: Preferred billing currency
+      options:
+        - CNY 18 per month
+        - CNY 179 per year
+        - USD 2.50 per month
+        - USD 25 per year
+    validations:
+      required: true
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Non-confidential use case
+      description: Briefly describe the type of monetized content or paid client work. Do not name clients.
+      placeholder: Independent video creator producing monetized tutorials and occasional client edits.
+    validations:
+      required: true
+  - type: input
+    id: contact
+    attributes:
+      label: Preferred contact handle
+      description: Provide a public-safe GitHub, social, or business contact handle. Do not post a private phone number or address.
+      placeholder: "@your-handle"
+    validations:
+      required: true

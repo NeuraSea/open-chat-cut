@@ -221,7 +221,12 @@ OpenChatCut modifications and new components are licensed under the
 and all non-production use are permitted by the license; business production,
 paid client work, commercial content production, SaaS, hosted services, OEM,
 white-label, and proprietary redistribution require a separate
-[NeuraSea Commercial License](COMMERCIAL-LICENSE.md). Version 0.1.0 changes to
-AGPL-3.0-only on 2030-07-21. The imported OpenCut Classic baseline retains its
-MIT notice in [`LICENSES/OpenCut-MIT.txt`](LICENSES/OpenCut-MIT.txt); see
-[`NOTICE.md`](NOTICE.md).
+[NeuraSea Commercial License](COMMERCIAL-LICENSE.md). Eligible independent
+creators can license commercial content and paid client work for CNY 18 or USD
+2.50 per month, or CNY 179 or USD 25 per year, under the
+[Creator License](CREATOR-LICENSE.md). The planned Creator service includes 100
+monthly [NeuraSea AI Credits](AI-CREDITS.md) for selected hosted open models
+when the preview launches; local and BYOK workflows remain available, and paid
+third-party providers are excluded. Version 0.1.0 changes to AGPL-3.0-only on
+2030-07-21. The imported OpenCut Classic baseline retains its MIT notice in
+[`LICENSES/OpenCut-MIT.txt`](LICENSES/OpenCut-MIT.txt); see [`NOTICE.md`](NOTICE.md).
