@@ -1,1 +1,5 @@
-dist/
+.next/
+.source/
+out/
+node_modules/
+*.tsbuildinfo

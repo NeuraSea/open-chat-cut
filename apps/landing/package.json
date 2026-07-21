@@ -2,10 +2,28 @@
   "name": "@openchatcut/landing",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "build": "node build.mjs",
-    "dev": "npm run build && npm exec --prefix ../web -- wrangler pages dev dist --port 3111",
-    "deploy": "npm run build && npm exec --prefix ../web -- wrangler pages deploy dist --project-name open-chat-cut --branch main"
+    "build": "next build && node scripts/postbuild.mjs",
+    "dev": "next dev --port 3111",
+    "start": "next start --port 3111",
+    "deploy": "npm run build && npm exec --prefix ../web -- wrangler pages deploy out --project-name open-chat-cut --branch main",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@types/mdx": "^2.0.13",
+    "fumadocs-core": "^16.11.5",
+    "fumadocs-mdx": "^15.2.0",
+    "fumadocs-ui": "^16.11.5",
+    "next": "^16.2.11",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.2"
   }
 }

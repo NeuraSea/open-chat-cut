@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">OpenChatCut</title>
+  <defs>
+    <linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#g)" d="M12 8h40a6 6 0 0 1 6 6v27a6 6 0 0 1-6 6H34L20 57v-10h-8a6 6 0 0 1-6-6V14a6 6 0 0 1 6-6Z"/>
+  <path fill="#09090b" fill-rule="evenodd" d="m19 20 9 8-9 8 4 4 13-12-13-12-4 4Zm18 1h10v5H37v-5Zm0 9h8v5h-8v-5Z"/>
+</svg>

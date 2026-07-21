@@ -1,0 +1,25 @@
+---
+title: Overview
+description: A local-first AI video editor with an auditable operation engine.
+---
+
+OpenChatCut turns natural-language editing requests into explicit, reviewable timeline operations. The editor, daemon, Codex plugin, workers and exporters all read the same versioned project state.
+
+## What makes it different
+
+- **Local-first project truth.** SQLite WAL and a content-addressed media library remain authoritative after the browser closes.
+- **AI cannot rewrite project JSON.** Every write is a validated semantic transaction with an expected revision and idempotency key.
+- **Plans before mutations.** Agent proposals include the diff, affected dependencies, warnings and estimated provider cost.
+- **Editable outputs.** Captions, motion graphics, B-roll, generated media and audio derivatives remain real timeline assets.
+
+## Current topology
+
+| Service | Default address | Purpose |
+| --- | --- | --- |
+| Web editor | `127.0.0.1:3100` | Timeline, transcript, preview and Agent review |
+| `openchatcutd` | `127.0.0.1:3210` | Projects, revisions, jobs, providers and exports |
+| MCP bridge | STDIO → daemon | Lets Codex use the same operation engine |
+
+## Start here
+
+Continue to [Installation](/docs/installation/) for the local setup, then read [Architecture](/docs/architecture/) to understand revisions and media ownership.

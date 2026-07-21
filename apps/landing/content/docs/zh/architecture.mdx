@@ -1,0 +1,34 @@
+---
+title: 架构
+description: revision、语义操作、媒体库和持久任务如何构成同一份项目事实。
+---
+
+## Operation Engine
+
+编辑器手动命令与 MCP 工具都向同一个纯 reducer 提交语义操作。事务包含：
+
+```ts
+type EditTransaction = {
+  transactionId: string;
+  projectId: string;
+  baseRevision: number;
+  actor: string;
+  operations: Operation[];
+};
+```
+
+daemon 会验证整批操作，通过 revision CAS 后原子提交。基础 revision 冲突时会明确拒绝，绝不静默覆盖。
+
+## 受管媒体
+
+导入和生成媒体会复制进 SHA-256 内容寻址媒体库。缩略图、波形、代理和清理后的音频都是派生资产，原素材不会被覆盖。
+
+Linked-file 是需要明确开启的高级模式。系统限制授权文件根、防止 symlink escape，并把项目标记为不可移植。
+
+## 持久任务
+
+Provider 使用可恢复生命周期：
+
+`submit → poll/resume → download → normalize → materialize`
+
+任务可跨 daemon 和 Worker 重启恢复。生成结果会立即下载，项目不会依赖 Provider 的临时 URL。

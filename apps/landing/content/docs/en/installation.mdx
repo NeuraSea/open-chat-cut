@@ -1,0 +1,40 @@
+---
+title: Installation
+description: Install and run the daemon, media worker, editor and Codex plugin.
+---
+
+## Requirements
+
+- macOS, Windows or Linux
+- Git, Node.js 22+, Rust and FFmpeg
+- Docker is optional
+- Codex CLI is optional but recommended for Agent workflows
+
+## One-command local setup
+
+```bash
+git clone https://github.com/NeuraSea/open-chat-cut.git
+cd open-chat-cut
+./scripts/install.sh
+```
+
+On Windows PowerShell:
+
+```powershell
+git clone https://github.com/NeuraSea/open-chat-cut.git
+cd open-chat-cut
+.\scripts\install.ps1
+```
+
+## Start and stop
+
+```bash
+npm start
+npm stop
+```
+
+The daemon binds to loopback by default. Do not expose port `3210` directly to a public network.
+
+## Codex plugin
+
+Run `codex login`, install the marketplace plugin during setup, then open a **new Codex task** so the MCP bridge and skills are loaded.

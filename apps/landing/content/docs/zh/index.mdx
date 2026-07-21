@@ -1,0 +1,25 @@
+---
+title: 概览
+description: 基于可审计 Operation Engine 的本地优先 AI 视频编辑器。
+---
+
+OpenChatCut 把自然语言剪辑请求转换成明确、可审核的时间线操作。编辑器、daemon、Codex 插件、Worker 和导出器共享同一份版本化项目状态。
+
+## 核心差异
+
+- **本地项目事实。** SQLite WAL 与内容寻址媒体库是权威存储，浏览器关闭后仍可继续工作。
+- **AI 不能改写项目 JSON。** 每次写入都是带 expected revision 与幂等键的语义事务。
+- **先计划，后修改。** Agent proposal 包含差异、依赖影响、警告与 Provider 预计费用。
+- **输出仍然可编辑。** 字幕、MG、B-roll、生成素材和音频派生物都是实际时间线资产。
+
+## 默认拓扑
+
+| 服务 | 默认地址 | 用途 |
+| --- | --- | --- |
+| Web 编辑器 | `127.0.0.1:3100` | 时间线、文字稿、预览与 Agent 审核 |
+| `openchatcutd` | `127.0.0.1:3210` | 项目、revision、任务、Provider 与导出 |
+| MCP bridge | STDIO → daemon | 让 Codex 使用同一套 Operation Engine |
+
+## 从这里开始
+
+前往[安装](/zh/docs/installation/)完成本地设置，再阅读[架构](/zh/docs/architecture/)了解 revision 与媒体归属。

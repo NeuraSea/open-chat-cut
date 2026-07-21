@@ -1,0 +1,40 @@
+---
+title: 安装
+description: 安装并启动 daemon、媒体 Worker、Web 编辑器与 Codex 插件。
+---
+
+## 环境要求
+
+- macOS、Windows 或 Linux
+- Git、Node.js 22+、Rust 与 FFmpeg
+- Docker 可选
+- Codex CLI 可选，但推荐用于 Agent 工作流
+
+## 一条命令安装
+
+```bash
+git clone https://github.com/NeuraSea/open-chat-cut.git
+cd open-chat-cut
+./scripts/install.sh
+```
+
+Windows PowerShell：
+
+```powershell
+git clone https://github.com/NeuraSea/open-chat-cut.git
+cd open-chat-cut
+.\scripts\install.ps1
+```
+
+## 启动与停止
+
+```bash
+npm start
+npm stop
+```
+
+daemon 默认只绑定 loopback。不要把 `3210` 端口直接暴露到公共网络。
+
+## Codex 插件
+
+运行 `codex login`，在安装流程中安装 marketplace 插件，然后打开一个**新的 Codex 任务**以加载 MCP bridge 和 Skills。

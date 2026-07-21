@@ -1,0 +1,34 @@
+---
+title: Architecture
+description: How revisions, operations, media and persistent jobs form one project truth.
+---
+
+## Operation engine
+
+Manual editor commands and MCP tools both submit semantic operations to the same pure reducer. A transaction carries:
+
+```ts
+type EditTransaction = {
+  transactionId: string;
+  projectId: string;
+  baseRevision: number;
+  actor: string;
+  operations: Operation[];
+};
+```
+
+The daemon validates the whole batch, performs a revision compare-and-swap and commits atomically. A conflicting base revision is rejected rather than silently overwritten.
+
+## Managed media
+
+Imported and generated media is copied into a SHA-256 addressed library. Thumbnails, waveforms, proxies and cleaned audio are derivatives; the original asset is never overwritten.
+
+Linked-file mode is an explicit advanced option. It restricts file roots, guards against symlink escape and marks the project as non-portable.
+
+## Persistent jobs
+
+Providers follow a resumable lifecycle:
+
+`submit → poll/resume → download → normalize → materialize`
+
+Jobs survive daemon and worker restarts. Generated results are downloaded immediately so a project never depends on a provider's temporary URL.

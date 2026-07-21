@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build:daemon": "cargo build --release -p openchatcut-daemon --bin openchatcutd",
-    "build:landing": "node apps/landing/build.mjs",
+    "build:landing": "npm run build --workspace @openchatcut/landing",
     "build:tools": "turbo run build --filter=@opencut/tools",
     "build:wasm": "wasm-pack build rust/wasm --target bundler --out-dir pkg",
     "build:web": "turbo run build --filter=@opencut/web",

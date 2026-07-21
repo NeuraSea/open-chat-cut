@@ -1,11 +1,13 @@
-# OpenChatCut static landing site
+# OpenChatCut Fumadocs site
 
-This app generates the bilingual, marketing-only static site for Cloudflare
-Pages. It deliberately does not expose the local editor or daemon as a public
-SaaS service.
+This Next.js + Fumadocs app generates the bilingual marketing site and product
+documentation as a static export for Cloudflare Pages. It deliberately does
+not expose the local editor or daemon as a public SaaS service.
 
 - English: `/`
 - Simplified Chinese: `/zh/`
+- English docs: `/docs/`
+- Simplified Chinese docs: `/zh/docs/`
 - Production domain: `https://open-chatcut.nervafs.xyz`
 
 Build and preview:
@@ -13,7 +15,7 @@ Build and preview:
 ```bash
 cd apps/landing
 npm run build
-npx wrangler pages dev dist --port 3111
+npx wrangler pages dev out --port 3111
 ```
 
 Deploy after authenticating Wrangler:
@@ -22,5 +24,6 @@ Deploy after authenticating Wrangler:
 npm run deploy
 ```
 
-The real editor image is copied from the deterministic capture maintained by
-`apps/web/scripts/capture-landing-editor-preview.mjs`.
+The static site is emitted to `out/`. Fumadocs MDX content lives under
+`content/docs/`, and the real editor image is copied from the deterministic
+capture maintained by `apps/web/scripts/capture-landing-editor-preview.mjs`.
