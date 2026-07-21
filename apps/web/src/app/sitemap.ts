@@ -1,18 +1,7 @@
-import { SITE_URL } from "@/site/brand";
-import { getPosts } from "@/blog/query";
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/site/brand";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-	const data = await getPosts();
-
-	const postPages: MetadataRoute.Sitemap =
-		data?.posts?.map((post) => ({
-			url: `${SITE_URL}/blog/${post.slug}`,
-			lastModified: new Date(post.publishedAt),
-			changeFrequency: "weekly",
-			priority: 0.8,
-		})) ?? [];
-
+export default function sitemap(): MetadataRoute.Sitemap {
 	return [
 		{
 			url: SITE_URL,
@@ -21,16 +10,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			priority: 1,
 		},
 		{
-			url: `${SITE_URL}/contributors`,
+			url: `${SITE_URL}/pricing`,
 			lastModified: new Date(),
-			changeFrequency: "daily",
-			priority: 0.5,
+			changeFrequency: "monthly",
+			priority: 0.8,
 		},
 		{
-			url: `${SITE_URL}/roadmap`,
+			url: `${SITE_URL}/contributors`,
 			lastModified: new Date(),
 			changeFrequency: "weekly",
-			priority: 1,
+			priority: 0.4,
 		},
 		{
 			url: `${SITE_URL}/privacy`,
@@ -44,18 +33,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			changeFrequency: "monthly",
 			priority: 0.5,
 		},
-		{
-			url: `${SITE_URL}/why-not-capcut`,
-			lastModified: new Date(),
-			changeFrequency: "yearly",
-			priority: 1,
-		},
-		{
-			url: `${SITE_URL}/blog`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 1,
-		},
-		...postPages,
 	];
 }

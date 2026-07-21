@@ -11,7 +11,6 @@ import {
 	Copy01Icon,
 	Download01Icon,
 	GithubIcon,
-	LinkSquare02Icon,
 	Menu02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -33,22 +32,6 @@ export function Header() {
 		{
 			label: "Pricing",
 			href: "/pricing",
-		},
-		{
-			label: "Roadmap",
-			href: "/roadmap",
-		},
-		{
-			label: "Contributors",
-			href: "/contributors",
-		},
-		{
-			label: "Sponsors",
-			href: "/sponsors",
-		},
-		{
-			label: "Blog",
-			href: "/blog",
 		},
 	];
 
@@ -93,12 +76,6 @@ export function Header() {
 								<HugeiconsIcon icon={Download01Icon} />
 								Download SVG
 							</ContextMenuItem>
-							<Link href="/brand">
-								<ContextMenuItem>
-									<HugeiconsIcon icon={LinkSquare02Icon} />
-									Brand assets
-								</ContextMenuItem>
-							</Link>
 						</ContextMenuContent>
 					</ContextMenu>
 
