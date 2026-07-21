@@ -1,0 +1,11 @@
+{
+  "name": "@openchatcut/landing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "npm run build && npm exec --prefix ../web -- wrangler pages dev dist --port 3111",
+    "deploy": "npm run build && npm exec --prefix ../web -- wrangler pages deploy dist --project-name open-chat-cut --branch main"
+  }
+}

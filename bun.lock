@@ -19,6 +19,10 @@
         "typescript-eslint": "^8.59.0",
       },
     },
+    "apps/landing": {
+      "name": "@openchatcut/landing",
+      "version": "0.1.0",
+    },
     "apps/web": {
       "name": "@opencut/web",
       "version": "0.1.0",
