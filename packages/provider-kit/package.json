@@ -1,0 +1,9 @@
+{
+  "name": "@openchatcut/provider-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "BUSL-1.1",
+  "scripts": { "test": "bun test" },
+  "devDependencies": { "@types/bun": "latest" }
+}

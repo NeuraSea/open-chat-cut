@@ -1,0 +1,4 @@
+interface:
+  display_name: "Captions"
+  short_description: "Create and style transcript-linked captions"
+  default_prompt: "Add readable word-highlight captions to my OpenChatCut project."

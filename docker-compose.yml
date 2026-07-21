@@ -1,0 +1,89 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_OPENCHATCUT_API_URL: ${NEXT_PUBLIC_OPENCHATCUT_API_URL:-http://127.0.0.1:3210/api/v1}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OPENCHATCUT_WEB_PORT:-3100}:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:${OPENCHATCUT_WEB_PORT:-3100}
+      NEXT_PUBLIC_OPENCHATCUT_API_URL: ${NEXT_PUBLIC_OPENCHATCUT_API_URL:-http://127.0.0.1:3210/api/v1}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  daemon:
+    profiles: ["full-cpu"]
+    build:
+      context: .
+      dockerfile: ./apps/daemon/Dockerfile.full
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3210:3210"
+    environment:
+      OPENCHATCUT_CONTAINERIZED: "true"
+      OPENCHATCUT_BIND: 0.0.0.0:3210
+      OPENCHATCUT_HOME: /runtime
+      OPENCHATCUT_DATA_DIR: /data
+      OPENCHATCUT_EDITOR_URL: http://127.0.0.1:${OPENCHATCUT_WEB_PORT:-3100}
+      OPENCHATCUT_WORKER_EDITOR_URL: http://web:3000
+      OPENCHATCUT_ALLOWED_ORIGINS: http://web:3000
+      OPENCHATCUT_IMPORT_ROOTS: /imports
+      OPENCHATCUT_MEDIA_WORKER: /opt/openchatcut/venv/bin/openchatcut-media-worker
+      OPENCHATCUT_MG_RUNTIME_CLI: /opt/openchatcut/mg-runtime/src/cli.mjs
+      OPENCHATCUT_NODE_COMMAND: /usr/local/bin/node
+      OPENCHATCUT_VIDEO_ACCELERATION: cpu
+    volumes:
+      - openchatcut-data:/data
+      - openchatcut-runtime:/runtime
+      - openchatcut-imports:/imports
+
+  daemon-nvidia:
+    profiles: ["full-nvidia"]
+    build:
+      context: .
+      dockerfile: ./apps/daemon/Dockerfile.full
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3210:3210"
+    gpus: all
+    environment:
+      OPENCHATCUT_CONTAINERIZED: "true"
+      OPENCHATCUT_BIND: 0.0.0.0:3210
+      OPENCHATCUT_HOME: /runtime
+      OPENCHATCUT_DATA_DIR: /data
+      OPENCHATCUT_EDITOR_URL: http://127.0.0.1:${OPENCHATCUT_WEB_PORT:-3100}
+      OPENCHATCUT_WORKER_EDITOR_URL: http://web:3000
+      OPENCHATCUT_ALLOWED_ORIGINS: http://web:3000
+      OPENCHATCUT_IMPORT_ROOTS: /imports
+      OPENCHATCUT_MEDIA_WORKER: /opt/openchatcut/venv/bin/openchatcut-media-worker
+      OPENCHATCUT_MG_RUNTIME_CLI: /opt/openchatcut/mg-runtime/src/cli.mjs
+      OPENCHATCUT_NODE_COMMAND: /usr/local/bin/node
+      OPENCHATCUT_VIDEO_ACCELERATION: nvidia
+    volumes:
+      - openchatcut-data:/data
+      - openchatcut-runtime:/runtime
+      - openchatcut-imports:/imports
+
+networks:
+  default:
+    name: openchatcut-web
+
+volumes:
+  openchatcut-data:
+  openchatcut-runtime:
+  openchatcut-imports:

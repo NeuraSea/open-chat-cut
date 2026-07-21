@@ -1,0 +1,209 @@
+name: OpenChatCut CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: openchatcut-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cross-platform-core:
+    name: Core (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install JavaScript dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test opt-in acceptance harness safety
+        run: python -m unittest discover -s scripts/tests -p "test_*.py"
+
+      - name: Validate install and release scripts
+        shell: bash
+        run: |
+          bash -n scripts/install.sh scripts/release/package-unix.sh
+          sh -n scripts/release/openchatcut-portable.sh scripts/release/install-release.sh
+          python -m py_compile scripts/release/*.py
+
+      - name: Validate formatting
+        run: cargo fmt --all --check
+
+      - name: Test revision engine and daemon
+        run: cargo test -p openchatcut-domain -p openchatcut-daemon -p gpu
+
+      - name: Check repository WebAssembly renderer
+        run: cargo check --locked --target wasm32-unknown-unknown -p opencut-wasm
+
+      - name: Test Codex STDIO MCP bridge
+        run: node --test plugins/open-chat-cut/tests/*.test.mjs
+        shell: bash
+
+      - name: Test Web editor, plugins, providers, and MG sandbox
+        run: bun test
+
+      - name: Build and type-check Web editor
+        working-directory: apps/web
+        env:
+          BETTER_AUTH_SECRET: "ci-only-local-build-secret-32-bytes"
+        run: bun run build
+
+      - name: Build native daemon executable
+        run: cargo build -p openchatcut-daemon --bin openchatcutd
+
+      - name: Install Chromium smoke dependency
+        run: python -m pip install playwright
+
+      - name: Install Chromium and Linux system dependencies
+        if: runner.os == 'Linux'
+        run: python -m playwright install --with-deps chromium
+
+      - name: Install Chromium
+        if: runner.os != 'Linux'
+        run: python -m playwright install chromium
+
+      - name: Verify plugin, MCP, browser edit, managed media, and project package roundtrip
+        run: python scripts/verify-cross-platform-smoke.py
+
+  media-worker:
+    name: Native media worker (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: services/media-worker/pyproject.toml
+
+      - name: Install worker test dependencies
+        run: python -m pip install -e "services/media-worker[dev]"
+
+      - name: Install FFmpeg on Linux
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Test worker protocol and path security
+        run: python -m pytest services/media-worker/tests
+
+      - name: Verify release export fixture
+        if: runner.os == 'Linux'
+        run: python scripts/verify-export-fixture.py
+
+  web-image:
+    name: Local Web image
+    runs-on: ubuntu-latest
+    needs: cross-platform-core
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Build default local-only Docker profile
+        run: docker compose build web
+
+      - name: Install Rust for daemon/browser integration
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install the headless media worker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install -e "services/media-worker[render]"
+          python -m playwright install --with-deps chromium
+
+      - name: Verify pinned Headless Chromium preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build -p openchatcut-daemon --bin openchatcutd
+          docker run -d --rm --name openchatcut-preview-ci \
+            -p 127.0.0.1:3100:3000 open-chat-cut-web
+          cleanup() {
+            test -f daemon.pid && kill "$(cat daemon.pid)" 2>/dev/null || true
+            docker rm -f openchatcut-preview-ci >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          export OPENCHATCUT_HOME="$RUNNER_TEMP/openchatcut-home"
+          export OPENCHATCUT_DATA_DIR="$RUNNER_TEMP/openchatcut-data"
+          export OPENCHATCUT_MEDIA_WORKER="$PWD/scripts/run-media-worker-from-source.py"
+          ./target/debug/openchatcutd > daemon.log 2>&1 &
+          echo $! > daemon.pid
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3100/api/health >/dev/null \
+              && curl -fsS http://127.0.0.1:3210/health >/dev/null \
+              && test -f "$OPENCHATCUT_HOME/daemon.token"; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              cat daemon.log
+              exit 1
+            fi
+            sleep 1
+          done
+          python scripts/verify-headless-preview.py \
+            --token-path "$OPENCHATCUT_HOME/daemon.token"
+
+      - name: Validate Compose loopback exposure
+        run: |
+          docker compose config > compose.resolved.yml
+          grep -q '127.0.0.1:3100' compose.resolved.yml
+          docker compose --profile full-cpu config > compose.cpu.yml
+          grep -q 'OPENCHATCUT_VIDEO_ACCELERATION: cpu' compose.cpu.yml
+          grep -q 'host_ip: 127.0.0.1' compose.cpu.yml
+          docker compose --profile full-nvidia config > compose.nvidia.yml
+          grep -q 'OPENCHATCUT_VIDEO_ACCELERATION: nvidia' compose.nvidia.yml
+          grep -q 'host_ip: 127.0.0.1' compose.nvidia.yml
+          OPENCHATCUT_DOMAIN=cut.example.com \
+          OPENCHATCUT_ADMIN_USER=editor \
+          OPENCHATCUT_ADMIN_PASSWORD_HASH='$$2a$$14$$ci-only-placeholder' \
+          docker compose -f docker-compose.hosted.yml config > compose.hosted.yml
+          grep -q 'OPENCHATCUT_HOSTED_ORIGIN: https://cut.example.com' compose.hosted.yml
+          if grep -q 'published: "3210"' compose.hosted.yml; then
+            echo 'hosted daemon must not publish port 3210' >&2
+            exit 1
+          fi

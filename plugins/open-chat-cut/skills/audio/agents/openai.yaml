@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audio Cleanup"
+  short_description: "Clean dialogue and mix project audio"
+  default_prompt: "Analyze the dialogue and propose reversible audio cleanup."

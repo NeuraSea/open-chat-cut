@@ -1,0 +1,35 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# asdf version management
+.tool-versions
+
+node_modules
+.venv/
+.openchatcut/
+.DS_Store
+dist/
+.pytest_cache/
+__pycache__/
+.cursorignore
+.turbo
+
+.env*
+!*.env.example
+
+# cursor
+bun.lockb
+
+# content-collections
+.content-collections
+
+# Twiggy
+.cursor/
+
+.open-next
+
+target/
+rust/wasm/pkg/
+
+.cargo-tools/
+
+rust-migration-notes.md

@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = [
+    "apps/daemon",
+    "apps/desktop",
+    "rust/crates/bridge",
+    "rust/crates/compositor",
+    "rust/crates/effects",
+    "rust/crates/gpu",
+    "rust/crates/masks",
+    "rust/crates/openchatcut-domain",
+    "rust/crates/time",
+    "rust/wasm",
+]

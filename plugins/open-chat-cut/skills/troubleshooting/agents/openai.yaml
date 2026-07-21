@@ -1,0 +1,4 @@
+interface:
+  display_name: "Troubleshoot OpenChatCut"
+  short_description: "Diagnose daemon capability conflict and job errors"
+  default_prompt: "Diagnose why OpenChatCut is unavailable and give safe recovery steps."

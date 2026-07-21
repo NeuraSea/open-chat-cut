@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate Assets"
+  short_description: "Generate B-roll images voice music and SFX"
+  default_prompt: "Show available generators and propose assets for this video."

@@ -1,0 +1,150 @@
+name: OpenChatCut paid provider smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_cost:
+        description: I understand this workflow submits one real provider job and may incur charges
+        required: true
+        default: false
+        type: boolean
+      provider:
+        description: Configured provider to exercise
+        required: true
+        default: seedance-compatible
+        type: choice
+        options:
+          - seedance
+          - seedance-compatible
+          - fal
+          - suno
+      prompt:
+        description: Approved low-cost smoke prompt sent to the selected provider
+        required: true
+        default: A minimal two-second abstract blue circle animation on a black background
+        type: string
+      model:
+        description: Optional model advertised by the configured provider
+        required: false
+        type: string
+      options_json:
+        description: Provider-specific JSON options; keep duration/quality at the lowest smoke setting
+        required: true
+        default: "{}"
+        type: string
+      timeout_seconds:
+        description: Provider job timeout in seconds
+        required: true
+        default: "1800"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: openchatcut-paid-provider-smoke
+  cancel-in-progress: false
+
+jobs:
+  paid-provider-smoke:
+    if: ${{ inputs.confirm_cost }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg and media worker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install -e "services/media-worker[render]"
+
+      - name: Build daemon
+        run: cargo build --release -p openchatcut-daemon --bin openchatcutd
+
+      - name: Install private provider configuration
+        env:
+          PROVIDER_CONFIG_JSON: ${{ secrets.OPENCHATCUT_PAID_PROVIDER_CONFIG_JSON }}
+        run: |
+          if [ -z "$PROVIDER_CONFIG_JSON" ]; then
+            echo "Repository secret OPENCHATCUT_PAID_PROVIDER_CONFIG_JSON is required" >&2
+            exit 1
+          fi
+          umask 077
+          mkdir -p "$RUNNER_TEMP/openchatcut-home"
+          python -c 'import json, os, pathlib; value=json.loads(os.environ["PROVIDER_CONFIG_JSON"]); pathlib.Path(os.environ["RUNNER_TEMP"], "openchatcut-home", "providers.json").write_text(json.dumps(value), encoding="utf-8")'
+
+      - name: Start isolated daemon
+        run: |
+          export OPENCHATCUT_HOME="$RUNNER_TEMP/openchatcut-home"
+          export OPENCHATCUT_DATA_DIR="$RUNNER_TEMP/openchatcut-data"
+          export OPENCHATCUT_PROVIDER_CONFIG="$OPENCHATCUT_HOME/providers.json"
+          export OPENCHATCUT_MEDIA_WORKER="$PWD/scripts/run-media-worker-from-source.py"
+          ./target/release/openchatcutd > "$RUNNER_TEMP/openchatcut-provider-daemon.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/openchatcut-provider-daemon.pid"
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3210/health >/dev/null \
+              && test -f "$OPENCHATCUT_HOME/runtime.json" \
+              && test -f "$OPENCHATCUT_HOME/daemon.token"; then
+              exit 0
+            fi
+            if ! kill -0 "$(cat "$RUNNER_TEMP/openchatcut-provider-daemon.pid")" 2>/dev/null; then
+              cat "$RUNNER_TEMP/openchatcut-provider-daemon.log"
+              exit 1
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/openchatcut-provider-daemon.log"
+          exit 1
+
+      - name: Run explicitly approved paid smoke
+        env:
+          OPENCHATCUT_HOME: ${{ runner.temp }}/openchatcut-home
+          OPENCHATCUT_RUN_PAID_PROVIDER_SMOKE: I_UNDERSTAND_THIS_MAY_INCUR_COSTS
+          PROVIDER: ${{ inputs.provider }}
+          PROMPT: ${{ inputs.prompt }}
+          MODEL: ${{ inputs.model }}
+          OPTIONS_JSON: ${{ inputs.options_json }}
+          TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+        run: |
+          arguments=(
+            --provider "$PROVIDER"
+            --prompt "$PROMPT"
+            --options-json "$OPTIONS_JSON"
+            --timeout-seconds "$TIMEOUT_SECONDS"
+            --runtime-descriptor "$OPENCHATCUT_HOME/runtime.json"
+            --report "$RUNNER_TEMP/paid-provider-smoke-report.json"
+          )
+          if [ -n "$MODEL" ]; then
+            arguments+=(--model "$MODEL")
+          fi
+          python scripts/verify-paid-provider-smoke.py "${arguments[@]}"
+
+      - name: Upload redacted smoke report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paid-provider-smoke-report
+          path: ${{ runner.temp }}/paid-provider-smoke-report.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Stop isolated daemon
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/openchatcut-provider-daemon.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/openchatcut-provider-daemon.pid")" 2>/dev/null || true
+          fi
