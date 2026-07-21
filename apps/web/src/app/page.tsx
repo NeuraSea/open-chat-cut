@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
 	ArrowRight,
@@ -13,7 +14,6 @@ import {
 	Layers3,
 	LockKeyhole,
 	MousePointer2,
-	Play,
 	Sparkles,
 	WandSparkles,
 } from "lucide-react";
@@ -68,163 +68,24 @@ const creditCapabilities = [
 
 function ProductPreview() {
 	return (
-		<div className="relative mx-auto w-full max-w-6xl">
+		<figure className="relative mx-auto w-full max-w-6xl">
 			<div className="absolute -inset-10 -z-10 bg-[radial-gradient(circle_at_50%_30%,rgba(14,165,233,0.22),transparent_60%)] blur-2xl" />
-			<div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#090b0f] text-white shadow-2xl shadow-sky-950/30 ring-1 ring-black/10">
-				<div className="flex h-11 items-center justify-between border-b border-white/10 px-4 text-[11px] text-white/45">
-					<div className="flex items-center gap-2">
-						<span className="size-2.5 rounded-full bg-[#ff605c]" />
-						<span className="size-2.5 rounded-full bg-[#ffbd44]" />
-						<span className="size-2.5 rounded-full bg-[#00ca4e]" />
-					</div>
-					<span>launch-film.occ · revision 31</span>
-					<span className="rounded-full bg-emerald-400/10 px-2 py-1 text-emerald-300">
-						Saved locally
-					</span>
-				</div>
-
-				<div className="grid min-h-[520px] lg:grid-cols-[minmax(0,1fr)_340px]">
-					<div className="flex min-w-0 flex-col border-white/10 lg:border-r">
-						<div className="grid flex-1 gap-3 p-3 sm:grid-cols-[180px_minmax(0,1fr)]">
-							<div className="hidden rounded-xl border border-white/10 bg-white/[0.025] p-3 sm:block">
-								<p className="mb-4 text-[10px] font-semibold tracking-[0.18em] text-white/35 uppercase">
-									Transcript
-								</p>
-								<div className="space-y-3 text-[11px] leading-relaxed text-white/45">
-									<p>
-										<span className="text-sky-300">00:00</span> Today we are
-										shipping a faster way to edit.
-									</p>
-									<p className="rounded-md bg-rose-400/10 p-2 text-rose-200/60 line-through">
-										Um, let me start that again.
-									</p>
-									<p>
-										<span className="text-sky-300">00:04</span> Every decision
-										remains visible and reversible.
-									</p>
-									<p>
-										<span className="text-sky-300">00:09</span> Start with an
-										idea, finish with an editable timeline.
-									</p>
-								</div>
-							</div>
-
-							<div className="flex min-w-0 flex-col gap-3">
-								<div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-[radial-gradient(circle_at_55%_20%,#17324a_0%,#0c131d_48%,#07080b_100%)] p-6">
-									<div className="absolute top-5 left-5 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] text-white/55 backdrop-blur">
-										Preview · 1080p
-									</div>
-									<div className="text-center">
-										<div className="mx-auto mb-5 flex size-11 items-center justify-center rounded-full border border-sky-300/25 bg-sky-300/10">
-											<Play className="ml-0.5 size-4 fill-sky-200 text-sky-200" />
-										</div>
-										<p className="text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">
-											Make the cut.
-										</p>
-										<p className="mt-2 text-sm text-white/45">
-											Keep creative control.
-										</p>
-									</div>
-									<div className="absolute right-5 bottom-5 left-5 rounded-lg border border-sky-300/25 bg-sky-300/10 px-4 py-3 backdrop-blur">
-										<p className="text-xs font-semibold">Avery Chen</p>
-										<p className="text-[10px] text-sky-100/60">
-											Product designer
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div className="h-48 border-t border-white/10 bg-[#0b0d12] p-3">
-							<div className="mb-2 flex items-center justify-between text-[10px] text-white/35">
-								<span>00:00:03:18</span>
-								<span>30 fps · 00:00:14:00</span>
-							</div>
-							<div className="relative space-y-2 overflow-hidden pl-12">
-								<div className="absolute top-0 bottom-0 left-[39%] z-10 w-px bg-sky-400">
-									<span className="absolute -top-1 -left-1 size-2 rotate-45 bg-sky-400" />
-								</div>
-								<div className="absolute top-1 left-0 text-[9px] text-white/30">
-									VIDEO
-								</div>
-								<div className="flex h-9 gap-1">
-									<div className="w-[27%] rounded border border-indigo-300/20 bg-indigo-400/20 p-2 text-[9px] text-indigo-100/70">
-										Intro.mov
-									</div>
-									<div className="w-[42%] rounded border border-indigo-300/20 bg-indigo-400/20 p-2 text-[9px] text-indigo-100/70">
-										Main take.mov
-									</div>
-									<div className="flex-1 rounded border border-indigo-300/20 bg-indigo-400/20 p-2 text-[9px] text-indigo-100/70">
-										Close.mov
-									</div>
-								</div>
-								<div className="absolute top-12 left-0 text-[9px] text-white/30">
-									MG
-								</div>
-								<div className="ml-[9%] h-7 w-[36%] rounded border border-sky-300/25 bg-sky-300/15 p-1.5 text-[9px] text-sky-100/70">
-									lower-third-signal
-								</div>
-								<div className="absolute top-[78px] left-0 text-[9px] text-white/30">
-									AUDIO
-								</div>
-								<div className="h-7 rounded border border-emerald-300/20 bg-[repeating-linear-gradient(90deg,rgba(52,211,153,.22)_0_2px,transparent_2px_5px)]" />
-							</div>
-						</div>
-					</div>
-
-					<aside className="flex min-h-[430px] flex-col bg-[#0d1016] p-4">
-						<div className="flex items-center justify-between border-b border-white/10 pb-3">
-							<div className="flex items-center gap-2 text-xs font-medium">
-								<Sparkles className="size-3.5 text-sky-300" />
-								OpenChatCut Agent
-							</div>
-							<span className="size-2 rounded-full bg-emerald-400" />
-						</div>
-						<div className="flex-1 space-y-4 py-4 text-[11px] leading-relaxed">
-							<div className="ml-8 rounded-xl rounded-tr-sm bg-white/8 p-3 text-white/75">
-								Remove the false start, tighten pauses over 1.5 seconds, add
-								captions, then place a lower third in the first five seconds.
-							</div>
-							<div className="space-y-3 rounded-xl border border-white/10 p-3">
-								<div className="flex items-center justify-between">
-									<span className="font-medium text-white/80">
-										Review edit plan
-									</span>
-									<span className="text-white/35">4 operations</span>
-								</div>
-								{[
-									"Remove false start at 00:02.1",
-									"Close two pauses · save 2.4s",
-									"Create linked caption track",
-									"Add lower-third-signal · 0–5s",
-								].map((operation) => (
-									<div
-										key={operation}
-										className="flex items-start gap-2 text-white/50"
-									>
-										<Check className="mt-0.5 size-3 shrink-0 text-emerald-300" />
-										<span>{operation}</span>
-									</div>
-								))}
-								<div className="flex items-center justify-between border-t border-white/10 pt-3 text-[10px]">
-									<span className="text-white/35">Cost · 3 AI credits</span>
-									<span className="rounded-md bg-white px-3 py-1.5 font-medium text-black">
-										Apply changes
-									</span>
-								</div>
-							</div>
-						</div>
-						<div className="rounded-xl border border-white/10 bg-black/20 p-3 text-[11px] text-white/35">
-							Ask for an edit, generation, or export…
-							<div className="mt-3 flex items-center justify-between">
-								<span>Auto-apply off</span>
-								<ArrowRight className="size-3.5 text-white/55" />
-							</div>
-						</div>
-					</aside>
-				</div>
+			<div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#090b0f] shadow-2xl shadow-sky-950/30 ring-1 ring-black/10">
+				<Image
+					src="/landing/openchatcut-editor-fixture.png"
+					alt="The real OpenChatCut Web editor showing its Agent panel, motion graphic preview, properties panel, and revisioned timeline"
+					width={1600}
+					height={1000}
+					priority
+					sizes="(max-width: 768px) 100vw, 1152px"
+					className="h-auto w-full"
+				/>
 			</div>
-		</div>
+			<figcaption className="text-muted-foreground mt-4 text-center text-xs">
+				Actual OpenChatCut Web editor · deterministic MG/audio acceptance
+				fixture · no mock controls
+			</figcaption>
+		</figure>
 	);
 }
 

@@ -7,6 +7,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "capture:landing": "node scripts/capture-landing-editor-preview.mjs",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "lint": "eslint src --ext .ts,.tsx",
