@@ -8,7 +8,14 @@ export const metadata: Metadata = {
 	title: { default: "OpenChatCut — Local-first AI video editor", template: "%s · OpenChatCut" },
 	description: "Plan edits with an agent, approve the diff, and keep every clip, caption, motion graphic, and generated asset editable.",
 	openGraph: { type: "website", siteName: "OpenChatCut", images: ["/editor.png"] },
-	icons: { icon: "/logo.svg" },
+	icons: {
+		icon: [
+			{ url: "/favicon-v2.svg", type: "image/svg+xml" },
+			{ url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+		],
+		shortcut: "/favicon.ico",
+		apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+	},
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
