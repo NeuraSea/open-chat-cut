@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { Brand } from "@/components/landing-page";
+import { BorderTrail } from "@/components/sora-ui/effects/border-trail";
+import { TextEffect } from "@/components/sora-ui/texts/text-effect";
+import { MaskedTextReveal } from "@/components/sora-ui/texts/text-reveal-mask";
+import { TextScramble } from "@/components/sora-ui/texts/text-scramble";
+import { SlotText } from "@/components/motion/slot-text";
 import { repository, type Locale } from "@/lib/copy";
 
 const pluginCopy = {
 	en: {
 		home: "/", alt: "/zh/codex-plugin/", altLabel: "中文", docs: "/docs/codex-plugin/",
-		label: "OPENCHATCUT × CODEX", title: <>VIDEO EDITING<br/>IN CODEX</>,
+		label: "OPENCHATCUT × CODEX", title: "VIDEO EDITING\nIN CODEX",
 		lead: "Plan, inspect and deliver real OpenChatCut projects from Codex while every accepted change remains visible and editable in the timeline.",
 		install: "Install the plugin", docsLabel: "Read the docs",
 		terminalTitle: "One local bridge. The same project truth.",
@@ -21,7 +26,7 @@ const pluginCopy = {
 	},
 	zh: {
 		home: "/zh/", alt: "/codex-plugin/", altLabel: "English", docs: "/zh/docs/codex-plugin/",
-		label: "OPENCHATCUT × CODEX", title: <>在 CODEX<br/>完成视频剪辑</>,
+		label: "OPENCHATCUT × CODEX", title: "在 CODEX\n完成视频剪辑",
 		lead: "直接在 Codex 中规划、检查并交付真实 OpenChatCut 项目；每项已接受修改仍然完整保留在可见、可编辑的时间线上。",
 		install: "安装插件", docsLabel: "阅读文档",
 		terminalTitle: "一个本地 Bridge，同一份项目事实。",
@@ -40,14 +45,14 @@ const pluginCopy = {
 export function PluginPage({ locale }: { locale: Locale }) {
 	const c = pluginCopy[locale];
 	return <div className="plugin-shell">
-		<header className="site-nav"><div className="nav-inner"><Brand href={c.home}/><nav className="nav-links"><Link href={c.home}>Product</Link><span className="active-tab">Codex Plugin</span><Link href={c.docs}>Docs</Link></nav><div className="nav-actions"><Link className="nav-button hide-mobile" href={c.alt}>{c.altLabel}</Link><a className="nav-button primary" href={repository}>GitHub ↗</a></div></div></header>
+		<header className="site-nav"><div className="nav-inner"><Brand href={c.home}/><nav className="nav-links"><Link href={c.home}>Product</Link><span className="active-tab">Codex Plugin</span><Link href={c.docs}>Docs</Link></nav><div className="nav-actions"><Link className="nav-button hide-mobile" href={c.alt}>{c.altLabel}</Link><a className="nav-button primary" href={repository}><TextScramble as="span" trigger={false} triggerOnHover>GitHub ↗</TextScramble></a></div></div></header>
 		<main>
-			<section className="plugin-hero"><div className="plugin-label">{c.label}</div><h1>{c.title}</h1><p>{c.lead}</p><div className="hero-actions"><a className="button primary" href="#install">{c.install} ↓</a><Link className="button secondary" href={c.docs}>{c.docsLabel} →</Link></div></section>
-			<section className="plugin-terminal-wrap"><div className="plugin-terminal"><div className="terminal-bar"><span>open-chat-cut / plugin</span><span>local stdio mcp</span></div><div className="terminal-grid"><div><div className="kicker">MCP BRIDGE</div><h2>{c.terminalTitle}</h2></div><pre>{c.terminalLines.map((line,i)=><code className={i > 1 ? "success" : ""} key={line}>{line}{"\n"}</code>)}</pre></div></div></section>
-			<section className="section plugin-flow"><div className="section-heading"><div><div className="kicker">REVISION SAFE</div><h2>{c.flowTitle}</h2></div><p>{c.flowBody}</p></div><div className="plugin-steps">{c.steps.map(([n,title,body])=><article key={n}><span>{n}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
-			<section className="section"><div className="section-heading"><div><div className="kicker">25 MCP TOOLS · 10 SKILLS</div><h2>{c.capTitle}</h2></div></div><div className="plugin-cap-grid">{c.caps.map(([title,body],i)=><article key={title}><span>0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
+			<section className="plugin-hero"><div className="plugin-label">{c.label}</div><SlotText text={c.title} /><TextEffect as="p" preset="slide" delay={.25}>{c.lead}</TextEffect><div className="hero-actions"><a className="button primary" href="#install">{c.install} ↓</a><Link className="button secondary" href={c.docs}>{c.docsLabel} →</Link></div></section>
+			<section className="plugin-terminal-wrap"><div className="plugin-terminal"><BorderTrail className="sora-trail" size={160} transition={{ duration: 6, ease: "linear", repeat: Number.POSITIVE_INFINITY }} /><div className="terminal-bar"><span>open-chat-cut / plugin</span><span>local stdio mcp</span></div><div className="terminal-grid"><div><div className="kicker">MCP BRIDGE</div><TextEffect as="h2" scrollTrigger preset="fade-in-blur">{c.terminalTitle}</TextEffect></div><pre>{c.terminalLines.map((line,i)=><code className={i > 1 ? "success" : ""} key={line}>{line}{"\n"}</code>)}</pre></div></div></section>
+			<section className="section plugin-flow"><div className="section-heading"><div><div className="kicker">REVISION SAFE</div><MaskedTextReveal as="h2" splitBy={locale === "zh" ? "chars" : "lines"} text={c.flowTitle} /></div><p>{c.flowBody}</p></div><div className="plugin-steps">{c.steps.map(([n,title,body],i)=><article key={n}><span>{n}</span><TextEffect as="h3" scrollTrigger preset="slide" delay={i * .05}>{title}</TextEffect><p>{body}</p></article>)}</div></section>
+			<section className="section"><div className="section-heading"><div><div className="kicker">25 MCP TOOLS · 10 SKILLS</div><TextEffect as="h2" scrollTrigger preset="fade-in-blur">{c.capTitle}</TextEffect></div></div><div className="plugin-cap-grid">{c.caps.map(([title,body],i)=><article key={title}><span>0{i+1}</span><TextEffect as="h3" scrollTrigger preset="slide" delay={(i % 3) * .05}>{title}</TextEffect><p>{body}</p></article>)}</div></section>
 			<section className="plugin-security"><div><div className="kicker">SECURITY MODEL</div><h2>{c.securityTitle}</h2></div><p>{c.securityBody}</p></section>
-			<section className="plugin-install" id="install"><div className="plugin-label">SOURCE-AVAILABLE WORKFLOW · LOCAL RUNTIME</div><h2>{c.cta}</h2><pre><code>git clone https://github.com/NeuraSea/open-chat-cut.git{"\n"}cd open-chat-cut{"\n"}./scripts/install.sh</code></pre><p>{c.note}</p><Link className="button secondary" href={c.docs}>{c.docsLabel} →</Link></section>
+			<section className="plugin-install" id="install"><div className="plugin-label">SOURCE-AVAILABLE WORKFLOW · LOCAL RUNTIME</div><TextEffect as="h2" scrollTrigger preset="fade-in-blur">{c.cta}</TextEffect><pre><code>git clone https://github.com/NeuraSea/open-chat-cut.git{"\n"}cd open-chat-cut{"\n"}./scripts/install.sh</code></pre><p>{c.note}</p><Link className="button secondary" href={c.docs}>{c.docsLabel} →</Link></section>
 		</main>
 		<footer className="site-footer"><span>© 2026 NeuraSea · OpenChatCut</span><span>Codex plugin · local daemon · revision-safe operations</span></footer>
 	</div>;
