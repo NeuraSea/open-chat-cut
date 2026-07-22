@@ -64,6 +64,19 @@ Then open <http://127.0.0.1:3110/projects>. Changing this value while the daemon
 is already running requires `OPENCHATCUT_WEB_PORT=3110 ./scripts/openchatcut.sh restart`
 so its editor URL and Origin allowlist are updated together.
 
+Local file import remains disabled until you explicitly authorize a directory.
+To let the daemon copy selected files from a dedicated media folder, restart it
+with that folder as the only authorized root:
+
+```bash
+mkdir -p "$HOME/Movies/OpenChatCut"
+OPENCHATCUT_AUTHORIZED_IMPORT_ROOT="$HOME/Movies/OpenChatCut" ./scripts/openchatcut.sh restart
+```
+
+PowerShell uses the same `OPENCHATCUT_AUTHORIZED_IMPORT_ROOT` environment
+variable. Paths outside the authorized directory remain inaccessible, and
+managed import still copies accepted media into the content-addressed library.
+
 ### Constrained all-Docker CPU profile
 
 For an isolated CPU-only evaluation that also containers the daemon, FFmpeg,

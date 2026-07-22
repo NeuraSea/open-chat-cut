@@ -69,6 +69,7 @@ COPY package.json package.json
 COPY bun.lock bun.lock
 COPY turbo.json turbo.json
 
+COPY apps/landing/package.json apps/landing/package.json
 COPY apps/web/package.json apps/web/package.json
 COPY packages/provider-kit/package.json packages/provider-kit/package.json
 COPY packages/mg-runtime/package.json packages/mg-runtime/package.json

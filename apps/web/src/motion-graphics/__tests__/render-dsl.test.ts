@@ -25,24 +25,28 @@ describe("motion graphic DSL renderer", () => {
 				width: 1920,
 				height: 1080,
 				durationSeconds: 5,
-				nodes: [{
-					id: "slot-mask",
-					type: "group",
-					x: 100,
-					y: 200,
-					width: 640,
-					height: 180,
-					anchorX: 0,
-					anchorY: 0,
-					clip: true,
-				}],
+				nodes: [
+					{
+						id: "slot-mask",
+						type: "group",
+						x: 100,
+						y: 200,
+						width: 640,
+						height: 180,
+						anchorX: 0,
+						anchorY: 0,
+						clip: true,
+					},
+				],
 			},
 			localTime: 0.5,
 			media: { resolve: async () => null },
 		});
 
 		const rect = calls.find(([name]) => name === "rect");
-		expect(rect?.slice(1).map((value) => Math.abs(value))).toEqual([0, 0, 640, 180]);
+		expect(rect?.slice(1).map((value) => Math.abs(Number(value)))).toEqual([
+			0, 0, 640, 180,
+		]);
 		expect(calls).toContainEqual(["clip"]);
 	});
 });

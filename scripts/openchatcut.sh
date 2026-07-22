@@ -12,6 +12,7 @@ MG_RUNTIME_CLI=${OPENCHATCUT_MG_RUNTIME_CLI:-"$HOME_DIR/runtime/mg-runtime/src/c
 DAEMON_LABEL=io.openchatcut.daemon
 VIDEO_ACCELERATION=${OPENCHATCUT_VIDEO_ACCELERATION:-auto}
 WEB_PORT=${OPENCHATCUT_WEB_PORT:-3100}
+AUTHORIZED_IMPORT_ROOT=${OPENCHATCUT_AUTHORIZED_IMPORT_ROOT:-}
 
 case "$VIDEO_ACCELERATION" in
   auto|cpu|apple|nvidia) ;;
@@ -52,6 +53,21 @@ install_daemon_binary() {
 start_daemon() {
   if [ "$(uname -s)" = Darwin ] && command -v launchctl >/dev/null 2>&1; then
     launchctl remove "$DAEMON_LABEL" >/dev/null 2>&1 || true
+    if [ -n "$AUTHORIZED_IMPORT_ROOT" ]; then
+      launchctl submit \
+        -l "$DAEMON_LABEL" \
+        -o "$LOG_FILE" \
+        -e "$LOG_FILE.err" \
+        -- /usr/bin/env \
+        "PATH=$PATH" \
+        "OPENCHATCUT_HOME=$HOME_DIR" \
+        "OPENCHATCUT_MEDIA_WORKER=$MEDIA_WORKER" \
+        "OPENCHATCUT_MG_RUNTIME_CLI=$MG_RUNTIME_CLI" \
+        "OPENCHATCUT_VIDEO_ACCELERATION=$VIDEO_ACCELERATION" \
+        "OPENCHATCUT_EDITOR_URL=http://127.0.0.1:$WEB_PORT" \
+        "$DAEMON_BIN" --authorized-import-root "$AUTHORIZED_IMPORT_ROOT"
+      return
+    fi
     launchctl submit \
       -l "$DAEMON_LABEL" \
       -o "$LOG_FILE" \
@@ -64,6 +80,17 @@ start_daemon() {
       "OPENCHATCUT_VIDEO_ACCELERATION=$VIDEO_ACCELERATION" \
       "OPENCHATCUT_EDITOR_URL=http://127.0.0.1:$WEB_PORT" \
       "$DAEMON_BIN"
+    return
+  fi
+
+  if [ -n "$AUTHORIZED_IMPORT_ROOT" ]; then
+    OPENCHATCUT_HOME="$HOME_DIR" \
+      OPENCHATCUT_MEDIA_WORKER="$MEDIA_WORKER" \
+      OPENCHATCUT_MG_RUNTIME_CLI="$MG_RUNTIME_CLI" \
+      OPENCHATCUT_VIDEO_ACCELERATION="$VIDEO_ACCELERATION" \
+      OPENCHATCUT_EDITOR_URL="http://127.0.0.1:$WEB_PORT" \
+      nohup "$DAEMON_BIN" --authorized-import-root "$AUTHORIZED_IMPORT_ROOT" >>"$LOG_FILE" 2>&1 &
+    echo $! >"$PID_FILE"
     return
   fi
 

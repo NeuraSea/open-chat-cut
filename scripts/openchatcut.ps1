@@ -11,6 +11,7 @@ $LogFile = Join-Path $HomeDir "openchatcutd.log"
 $Daemon = Join-Path $Root "target\release\openchatcutd.exe"
 $VideoAcceleration = if ($env:OPENCHATCUT_VIDEO_ACCELERATION) { $env:OPENCHATCUT_VIDEO_ACCELERATION.ToLowerInvariant() } else { "auto" }
 $WebPortText = if ($env:OPENCHATCUT_WEB_PORT) { $env:OPENCHATCUT_WEB_PORT } else { "3100" }
+$AuthorizedImportRoot = if ($env:OPENCHATCUT_AUTHORIZED_IMPORT_ROOT) { $env:OPENCHATCUT_AUTHORIZED_IMPORT_ROOT } else { $null }
 $WebPort = 0
 if (-not [int]::TryParse($WebPortText, [ref]$WebPort) -or $WebPort -lt 1 -or $WebPort -gt 65535 -or $WebPort -eq 3210) {
   throw "OPENCHATCUT_WEB_PORT must be from 1 to 65535 and cannot be the daemon port 3210"
@@ -33,7 +34,15 @@ function Start-OpenChatCut {
     $env:OPENCHATCUT_MG_RUNTIME_CLI = Join-Path $Root "packages\mg-runtime\src\cli.mjs"
     $env:OPENCHATCUT_VIDEO_ACCELERATION = $VideoAcceleration
     $env:OPENCHATCUT_EDITOR_URL = "http://127.0.0.1:$WebPort"
-    $Process = Start-Process -FilePath $Daemon -RedirectStandardOutput $LogFile -RedirectStandardError "$LogFile.err" -PassThru -WindowStyle Hidden
+    $DaemonArguments = @()
+    if ($AuthorizedImportRoot) {
+      $ResolvedImportRoot = (Resolve-Path -Path $AuthorizedImportRoot).Path
+      if (-not (Test-Path -Path $ResolvedImportRoot -PathType Container)) {
+        throw "OPENCHATCUT_AUTHORIZED_IMPORT_ROOT must identify an existing directory"
+      }
+      $DaemonArguments = @("--authorized-import-root", $ResolvedImportRoot)
+    }
+    $Process = Start-Process -FilePath $Daemon -ArgumentList $DaemonArguments -RedirectStandardOutput $LogFile -RedirectStandardError "$LogFile.err" -PassThru -WindowStyle Hidden
     Set-Content -Path $PidFile -Value $Process.Id
   }
   # Capability probing can take longer than 15 seconds on a cold worker start.

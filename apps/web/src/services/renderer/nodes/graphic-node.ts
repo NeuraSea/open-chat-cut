@@ -16,6 +16,7 @@ import {
 	isMotionGraphicJsxDefinition,
 	type MotionGraphicDefinition,
 } from "@/motion-graphics/types";
+import { motionGraphicTimeSeconds } from "@/motion-graphics/time";
 import {
 	VisualNode,
 	type ResolvedVisualNodeState,
@@ -78,11 +79,12 @@ export class GraphicNode extends VisualNode<
 		resolvedParams: ParamValues;
 		localTime: number;
 	}): Promise<OffscreenCanvas> {
+		const localTimeSeconds = motionGraphicTimeSeconds(localTime);
 		const motionGraphic = this.motionGraphicDsl;
 		if (motionGraphic) {
 			const cacheKey = JSON.stringify({
 				definition: motionGraphic,
-				localTime,
+				localTime: localTimeSeconds,
 			});
 			if (this.cachedSource && this.cachedKey === cacheKey) {
 				return this.cachedSource;
@@ -94,7 +96,7 @@ export class GraphicNode extends VisualNode<
 			await renderMotionGraphicDsl({
 				context,
 				definition: motionGraphic,
-				localTime,
+				localTime: localTimeSeconds,
 				media: this.mediaResolver,
 			});
 			this.cachedKey = cacheKey;
@@ -105,7 +107,7 @@ export class GraphicNode extends VisualNode<
 		if (motionGraphicJsx) {
 			const cacheKey = JSON.stringify({
 				ir: motionGraphicJsx.ir,
-				localTime,
+				localTime: localTimeSeconds,
 			});
 			if (this.cachedSource && this.cachedKey === cacheKey) {
 				return this.cachedSource;
@@ -117,7 +119,7 @@ export class GraphicNode extends VisualNode<
 			await renderMotionGraphicJsxIr({
 				context,
 				ir: motionGraphicJsx.ir,
-				localTime,
+				localTime: localTimeSeconds,
 				media: this.mediaResolver,
 			});
 			this.cachedKey = cacheKey;
