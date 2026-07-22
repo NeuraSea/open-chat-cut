@@ -4,6 +4,8 @@
 //! Callers generate stable IDs and persist idempotency receipts; this crate validates
 //! those inputs and applies a transaction atomically using revision compare-and-swap.
 
+#![recursion_limit = "256"]
+
 mod agent;
 mod caption;
 mod error;

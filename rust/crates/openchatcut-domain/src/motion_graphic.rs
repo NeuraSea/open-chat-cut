@@ -215,6 +215,58 @@ pub fn builtin_motion_graphic_templates() -> Vec<MotionGraphicTemplateDescriptor
             }),
         ),
         template(
+            "motion-slot-title",
+            "Motion Slot Title",
+            "title-card",
+            json!({
+                "version": 1, "width": 1920, "height": 1080, "durationSeconds": 5,
+                "designStyle": "motion-first-ink", "background": "#F7F7F5",
+                "nodes": [
+                    {"id": "slot-label", "type": "text", "text": "OPENCHATCUT / MOTION", "x": 960, "y": 205, "fontFamily": "Inter", "fontSize": 25, "fontWeight": 650, "letterSpacing": 7, "color": "#9A9A95", "animations": {"opacity": [{"time": 0, "value": 0, "easing": "ease-out"}, {"time": 0.35, "value": 1, "easing": "ease-out"}]}},
+                    {"id": "slot-mask-a", "type": "group", "x": 210, "y": 300, "width": 1500, "height": 170, "anchorX": 0, "anchorY": 0, "clip": true,
+                     "children": [{"id": "slot-reel-a", "type": "group", "x": 0, "y": 0, "width": 1500, "height": 850,
+                       "animations": {"y": [{"time": 0, "value": 0, "easing": "ease-out"}, {"time": 1.15, "value": -680, "easing": "back-out"}]},
+                       "children": [
+                         {"id": "slot-a-0", "type": "text", "text": "EDIT AT THE", "x": 750, "y": 85, "fontFamily": "Inter", "fontSize": 142, "fontWeight": 850, "letterSpacing": -7, "color": "#090909"},
+                         {"id": "slot-a-1", "type": "text", "text": "EDIT AT THE", "x": 750, "y": 255, "fontFamily": "Inter", "fontSize": 142, "fontWeight": 850, "letterSpacing": -7, "color": "#090909"},
+                         {"id": "slot-a-2", "type": "text", "text": "EDIT AT THE", "x": 750, "y": 425, "fontFamily": "Inter", "fontSize": 142, "fontWeight": 850, "letterSpacing": -7, "color": "#090909"},
+                         {"id": "slot-a-3", "type": "text", "text": "EDIT AT THE", "x": 750, "y": 595, "fontFamily": "Inter", "fontSize": 142, "fontWeight": 850, "letterSpacing": -7, "color": "#090909"},
+                         {"id": "slot-a-4", "type": "text", "text": "EDIT AT THE", "x": 750, "y": 765, "fontFamily": "Inter", "fontSize": 142, "fontWeight": 850, "letterSpacing": -7, "color": "#090909"}
+                       ]}]},
+                    {"id": "slot-mask-b", "type": "group", "x": 210, "y": 485, "width": 1500, "height": 170, "anchorX": 0, "anchorY": 0, "clip": true,
+                     "children": [{"id": "slot-reel-b", "type": "group", "x": 0, "y": 0, "width": 1500, "height": 1020,
+                       "animations": {"y": [{"time": 0.08, "value": 0, "easing": "ease-out"}, {"time": 1.42, "value": -850, "easing": "back-out"}]},
+                       "children": [
+                         {"id": "slot-b-0", "type": "text", "text": "SPEED OF INTENT", "x": 750, "y": 85, "fontFamily": "Inter", "fontSize": 132, "fontWeight": 850, "letterSpacing": -6, "color": "#090909"},
+                         {"id": "slot-b-1", "type": "text", "text": "SPEED OF INTENT", "x": 750, "y": 255, "fontFamily": "Inter", "fontSize": 132, "fontWeight": 850, "letterSpacing": -6, "color": "#090909"},
+                         {"id": "slot-b-2", "type": "text", "text": "SPEED OF INTENT", "x": 750, "y": 425, "fontFamily": "Inter", "fontSize": 132, "fontWeight": 850, "letterSpacing": -6, "color": "#090909"},
+                         {"id": "slot-b-3", "type": "text", "text": "SPEED OF INTENT", "x": 750, "y": 595, "fontFamily": "Inter", "fontSize": 132, "fontWeight": 850, "letterSpacing": -6, "color": "#090909"},
+                         {"id": "slot-b-4", "type": "text", "text": "SPEED OF INTENT", "x": 750, "y": 765, "fontFamily": "Inter", "fontSize": 132, "fontWeight": 850, "letterSpacing": -6, "color": "#090909"},
+                         {"id": "slot-b-5", "type": "text", "text": "SPEED OF INTENT", "x": 750, "y": 935, "fontFamily": "Inter", "fontSize": 132, "fontWeight": 850, "letterSpacing": -6, "color": "#090909"}
+                       ]}]},
+                    {"id": "slot-rule", "type": "shape", "shape": "rectangle", "x": 960, "y": 755, "width": 460, "height": 8, "fill": "#FF4D18", "animations": {"width": [{"time": 1.1, "value": 0, "easing": "ease-out"}, {"time": 1.75, "value": 460, "easing": "ease-out"}]}}
+                ]
+            }),
+        ),
+        template(
+            "motion-mask-lower-third",
+            "Motion Mask Lower Third",
+            "lower-third",
+            json!({
+                "version": 1, "width": 1920, "height": 1080, "durationSeconds": 5,
+                "designStyle": "motion-first-coral", "background": "#00000000",
+                "nodes": [{
+                    "id": "mask-lower-third", "type": "group", "x": 110, "y": 790, "width": 880, "height": 184, "anchorX": 0, "anchorY": 0, "clip": true,
+                    "children": [
+                        {"id": "mask-panel", "type": "shape", "shape": "rectangle", "x": 440, "y": 92, "width": 880, "height": 184, "fill": "#F7F7F5F2", "animations": {"width": [{"time": 0, "value": 0, "easing": "ease-out"}, {"time": 0.55, "value": 880, "easing": "ease-out"}]}},
+                        {"id": "mask-accent", "type": "shape", "shape": "rectangle", "x": 8, "y": 92, "width": 16, "height": 184, "fill": "#FF4D18", "animations": {"height": [{"time": 0, "value": 0, "easing": "ease-out"}, {"time": 0.4, "value": 184, "easing": "ease-out"}]}},
+                        {"id": "mask-name", "type": "text", "text": "Speaker Name", "x": 62, "y": 67, "fontFamily": "Inter", "fontSize": 58, "fontWeight": 820, "textAlign": "left", "color": "#090909", "animations": {"y": [{"time": 0.28, "value": 160, "easing": "ease-out"}, {"time": 0.86, "value": 67, "easing": "back-out"}], "opacity": [{"time": 0.28, "value": 0, "easing": "ease-out"}, {"time": 0.62, "value": 1, "easing": "ease-out"}]}},
+                        {"id": "mask-role", "type": "text", "text": "Role or context", "x": 65, "y": 132, "fontFamily": "Inter", "fontSize": 29, "fontWeight": 540, "textAlign": "left", "color": "#71717A", "animations": {"y": [{"time": 0.42, "value": 190, "easing": "ease-out"}, {"time": 1.02, "value": 132, "easing": "ease-out"}], "opacity": [{"time": 0.42, "value": 0, "easing": "ease-out"}, {"time": 0.78, "value": 1, "easing": "ease-out"}]}}
+                    ]
+                }]
+            }),
+        ),
+        template(
             "data-chart-neon",
             "Neon Data Chart",
             "data-chart",
@@ -884,7 +936,7 @@ mod tests {
     #[test]
     fn builtin_template_catalog_is_independently_valid_and_complete() {
         let templates = builtin_motion_graphic_templates();
-        assert_eq!(templates.len(), 8);
+        assert_eq!(templates.len(), 10);
         let ids = templates
             .iter()
             .map(|template| template.id.as_str())
@@ -911,5 +963,8 @@ mod tests {
             validate_motion_graphic_dsl(&template.definition)
                 .unwrap_or_else(|error| panic!("template {} is invalid: {error}", template.id));
         }
+
+        let slot = builtin_motion_graphic_template("motion-slot-title").unwrap();
+        assert_eq!(slot.definition["nodes"][1]["clip"], true);
     }
 }

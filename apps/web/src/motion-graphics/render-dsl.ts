@@ -359,6 +359,20 @@ async function renderNode(
 		scale * number(resolved.scaleX, 1),
 		scale * number(resolved.scaleY, 1),
 	);
+	if (resolved.type === "group" && resolved.clip === true) {
+		const width = number(resolved.width, 0);
+		const height = number(resolved.height, 0);
+		if (width > 0 && height > 0) {
+			context.beginPath();
+			context.rect(
+				-number(resolved.anchorX, 0) * width,
+				-number(resolved.anchorY, 0) * height,
+				width,
+				height,
+			);
+			context.clip();
+		}
+	}
 	switch (resolved.type) {
 		case "text":
 			drawText(context, resolved);

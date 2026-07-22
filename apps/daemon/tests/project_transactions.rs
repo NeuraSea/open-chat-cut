@@ -444,6 +444,16 @@ async fn motion_graphic_tool_validates_and_commits_dsl_and_safe_jsx_idempotently
             .iter()
             .any(|template| template["id"] == "lower-third-signal")
     );
+    assert!(
+        templates
+            .iter()
+            .any(|template| template["id"] == "motion-slot-title")
+    );
+    assert!(
+        templates
+            .iter()
+            .any(|template| template["id"] == "motion-mask-lower-third")
+    );
 
     let (status, templated) = json_request(
         &app,

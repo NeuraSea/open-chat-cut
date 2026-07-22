@@ -12,6 +12,12 @@ description: "Create editable OpenChatCut motion graphics. Use for lower thirds,
 3. Keep all resource references managed and all animation deterministic by timeline time.
 4. Call `create_motion_graphic` with `mode: dsl`, explicit insertion time/duration, current revision, and a new idempotency key.
 
+## Motion-first built-ins
+
+- Use `motion-slot-title` for the rolling, clipped editorial title treatment used by the OpenChatCut site.
+- Use `motion-mask-lower-third` for a block-wipe lower third with masked text entry.
+- Both are five-second editable DSL templates. They use timeline keyframes and safe group clipping, not React code at playback time, so preview and export remain deterministic.
+
 ## Advanced JSX
 
 - Use `mode: jsx` only when the user explicitly requests advanced scripted graphics that the DSL cannot express.
